@@ -70,6 +70,26 @@ svg{display:block;flex:none}
 .lock .lockic{display:grid;place-items:center;width:52px;height:52px;margin:4px auto 0;border:1.5px solid var(--ink);border-radius:50%;color:var(--ink)}
 .prochip{display:inline-block;font-family:var(--monocaps);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--sig);border:1.3px solid var(--sig);border-radius:4px;padding:1px 5px 0;margin-left:6px;vertical-align:2px}
 .logo{width:58px;height:58px;display:block}
+/* premium plans + gift receipt */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:22px}
+.plan{position:relative;border:1.5px solid var(--rule);border-radius:8px;padding:16px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;min-height:124px;background:var(--paper2)}
+.plan.on{border-color:var(--sig);box-shadow:inset 0 0 0 1.5px var(--sig)}
+.plan .pm{font-family:var(--serif);font-size:21px;line-height:1.1}
+.plan .ps{font-size:14px;margin-top:2px}
+.plan .ps b{font-size:20px}
+.plan .pp{font-size:12.5px;color:var(--muted)}
+.plan .pdisc{font-family:var(--mono);font-size:12.5px;color:var(--inc);font-weight:700}
+.plan .pbest{position:absolute;top:-11px;left:50%;transform:translateX(-50%) rotate(-3deg);background:var(--paper2);font-size:9.5px;margin:0;white-space:nowrap}
+.receipt.gift{margin:0 4px;padding-right:58px;overflow:visible}
+.receipt.gift .ribbon{position:absolute;top:0;bottom:0;right:24px;width:13px;background:var(--sig)}
+.receipt.gift .bow{position:absolute;top:-16px;right:4px;width:54px;height:34px}
+.gnote{font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.35;text-align:center;margin:18px 0 0;color:var(--ink);overflow-wrap:anywhere}
+.gfrom{text-align:right;font-family:var(--serif);font-style:italic;color:var(--ink2);margin-top:6px;font-size:16px}
+.gstamp{position:absolute;left:18px;bottom:22px;transform:rotate(-8deg);font-size:12px;margin:0;background:var(--paper2)}
+.sharebox{margin-top:12px;padding-top:12px;border-top:1px dashed var(--rule)}
+.langsw{display:flex;border:1px solid var(--ink);border-radius:999px;overflow:hidden;flex:none}
+.langsw button{min-width:40px;min-height:40px;padding:0 9px;font-size:13px;font-weight:600;color:var(--ink2)}
+.langsw button.on{background:var(--ink);color:var(--paper2)}
 .logo svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 14px rgba(36,54,201,.25))}
 .acct .mono.dng{color:var(--exp)}
 .muted{color:var(--muted)}
@@ -509,6 +529,10 @@ const P = {
   users: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.1 2.8-5 5.5-5s4.9 1.9 5.5 5"/><path d="M15.5 5.6a3 3 0 0 1 0 5.8"/><path d="M17 14.8c1.8.6 3 2.2 3.4 4.7"/>',
   bank: '<path d="M3.5 9.5L12 4.5l8.5 5"/><path d="M5.5 10.5v7M10 10.5v7M14 10.5v7M18.5 10.5v7M3.5 19.5h17"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5s1.2-6.1 3.6-8.5z"/>',
+  gift: '<rect x="4" y="9" width="16" height="11" rx="1.2"/><path d="M3 9h18v-2.5H3zM12 6.5V20M12 6.5c-1.2-2.4-4.6-3.2-5.2-1.2-.5 1.6 2.4 1.9 5.2 1.2zm0 0c1.2-2.4 4.6-3.2 5.2-1.2.5 1.6-2.4 1.9-5.2 1.2z"/>',
+  share: '<path d="M14 5l6 6-6 6M20 11H10a6 6 0 0 0-6 6v1"/>',
+  star: '<path d="M12 3.8l2.5 5.2 5.7.8-4.1 4 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4.1-4 5.7-.8z"/>',
   lock: '<rect x="5.5" y="10.5" width="13" height="9.5" rx="1.6"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><path d="M12 14.3v2"/>',
   pencil: '<path d="M14.5 5.5l4 4L8.5 19.5H4.5v-4z"/><path d="M12.5 7.5l4 4"/>',
   help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/>',
@@ -576,10 +600,12 @@ function fmtUSD(n) {
 const money = (n, cur) => cur === 'USD' ? '$' + fmtUSD(n) : fmt(n);
 const signed = (n, cur) => (n < 0 ? MINUS : n > 0 ? '+' : '') + money(n, cur);
 /** "2,8 mln" / "850 ming" / "900" */
+const CU = { ru: { mln: ' млн', ming: ' тыс.' }, 'uz-Cyrl': { mln: ' млн', ming: ' минг' } };
+const unitTxt = u => (CU[LANG] && CU[LANG][u]) || ' ' + u;
 function compact(n, unit = true) {
   n = Math.abs(Math.round(n || 0));
-  if (n >= 1e6) { const v = n / 1e6; const s = v >= 100 ? String(Math.round(v)) : String(Math.round(v * 10) / 10); return s.replace('.', ',') + (unit ? ' mln' : ''); }
-  if (n >= 1e3) return Math.round(n / 1e3) + (unit ? ' ming' : '');
+  if (n >= 1e6) { const v = n / 1e6; const s = v >= 100 ? String(Math.round(v)) : String(Math.round(v * 10) / 10); return s.replace('.', ',') + (unit ? unitTxt('mln') : ''); }
+  if (n >= 1e3) return Math.round(n / 1e3) + (unit ? unitTxt('ming') : '');
   return grp(n);
 }
 const pl = (n, w) => `${n} ${w}`; // Uzbek nouns don't pluralise after numerals
@@ -608,18 +634,112 @@ const ymAdd = (ym, k) => addMonths(ym + '-01', k, 1).slice(0, 7);
 const MON = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
 const MONS = ['yan', 'fev', 'mar', 'apr', 'may', 'iyun', 'iyul', 'avg', 'sen', 'okt', 'noy', 'dek'];
 const WD = ['yakshanba', 'dushanba', 'seshanba', 'chorshanba', 'payshanba', 'juma', 'shanba'];
+const RU_D = {
+  MON: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
+  MONN: ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'],
+  MONS: ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
+  WD: ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'],
+};
+
+/* =====================================================================
+   1c. LANGUAGE — uz (default), uz-Cyrl (transliterated from uz), ru (dictionary).
+   Templates are written in Uzbek; after every render the text nodes that are app
+   strings get swapped. User data (names, notes, amounts) never matches a key, so it stays.
+   ===================================================================== */
+const LANGS = [['uz', 'Oʻzbekcha', 'Lotin'], ['uz-Cyrl', 'Ўзбекча', 'Кирилл'], ['ru', 'Русский', 'Rus tili']];
+let LANG = 'uz';
+const I18N_RU = /*I18N_RU*/{"% yillik":"% годовых","(faqat odamlar bilan)":"(только с людьми)","(taxmin)":"(примерно)","(tizim)":"(системная)","0 soʻm":"0 сум","0 — limitsiz":"0 — без лимита","1 USD kursi":"Курс 1 USD","1 USD kursi, soʻm (ixtiyoriy)":"Курс 1 USD, сум (необязательно)","1 yil":"1 год","1-qadam":"Шаг 1","1-qadam · tanishuv":"Шаг 1 · знакомство","2-qadam":"Шаг 2","3 bosishda":"в 3 касания","3-qadam":"Шаг 3","AI bilan qoʻshish":"Добавить с AI","AI bilan yozish":"Записать с AI","AI boʻsh javob qaytardi":"AI вернул пустой ответ","AI bu matnni qayta ishlamadi":"AI не обработал этот текст","AI javobi chala qoldi":"Ответ AI оборвался","AI javobi juda kechikdi":"AI отвечал слишком долго","AI toʻldirdi — tekshirib, saqlang":"Заполнено AI — проверьте и сохраните","AI yordamchi":"AI-помощник","AI yordamchi — Premium imkoniyati":"AI-помощник — функция Premium","API kaliti notoʻgʻri":"Неверный API-ключ","Aloqa":"Связь","Amallar":"Действия","Annuitet":"Аннуитетный","Annuitet va differensial":"Аннуитетный и дифференцированный","Anthropic serveri javob bermadi":"Сервер Anthropic не ответил","Arxivdan chiqarish":"Из архива","Arxivlash":"В архив","Asosiy":"Главная","Asosiy menyu":"Главное меню","Asosiy qarz har oy teng qismda toʻlanadi, foiz esa qolgan qarzga hisoblanadi: birinchi toʻlovlar katta, keyin har oy kamayadi.":"Основной долг гасится равными частями, а проценты начисляются на остаток: первые платежи большие, потом каждый месяц меньше.","Asosiy summa":"Основная сумма","Asosiyga":"На главную","Avto":"Авто","Avtokredit":"Автокредит","Avval Sozlamalarda hisob qoʻshing":"Сначала добавьте счёт в Настройках","Balansga taʼsir qilsin":"Учитывать в балансе","Balansga taʼsirsiz":"Без влияния на баланс","Bank":"Банк","Bank ilovasidagi joriy qarzni kiriting.":"Введите текущий долг из приложения банка.","Bank krediti":"Банковский кредит","Bank krediti, nasiya yoki kredit kartani qoʻshing — toʻlov jadvali avtomatik tuziladi.":"Добавьте банковский кредит, рассрочку или кредитную карту — график платежей составится автоматически.","Bank kreditlari bu hisobga kirmaydi, ular Kreditlar boʻlimida.":"Банковские кредиты сюда не входят, они в разделе «Кредиты».","Barcha hisoblar, yozuvlar, qarzlar va kreditlar shu qurilmadan va bulutdan oʻchiriladi. Avval JSON zaxira olishni maslahat beramiz.":"Все счета, записи, долги и кредиты будут удалены с этого устройства и из облака. Советуем сначала сделать JSON-копию.","Barcha yozuvlar":"Все записи","Barcha yozuvlar jadval koʻrinishida":"Все записи в виде таблицы","Barcha yozuvlar {0}":"Все записи {0}","Bekor":"Отмена","Bekor qilish":"Отменить","Belgi":"Значок","Belgilash":"Задать","Berdim":"Дал","Berganlarim":"Я дал","Berildi":"Дано","Birinchi oy":"Первый месяц","Birinchi toʻlov":"Первый платёж","Birinchi toʻlov sanasi":"Дата первого платежа","Boshlangan":"Начало","Boshlangʻich qoldiq":"Начальный остаток","Boshlash":"Начать","Boshlash {0}":"Начать {0}","Boshqa":"Другое","Boshqa soʻz yoki filtr bilan urinib koʻring.":"Попробуйте другое слово или фильтр.","Bot eslatmalari":"Напоминания в боте","Bot eslatmalari oʻchirildi":"Напоминания в боте выключены","Bot eslatmalari tez orada ochiladi":"Напоминания в боте скоро появятся","Bot eslatmalari — Premium imkoniyati":"Напоминания в боте — функция Premium","Bot har kuni ertalab muddatlarni eslatadi":"Бот будет напоминать о сроках каждое утро","Botdan kelgan yozuv — tekshirib, saqlang":"Запись из бота — проверьте и сохраните","Bu daftarda":"В этом блокноте","Bu imkoniyat tez orada ochiladi":"Эта функция скоро появится","Bu kategoriyadagi yozuvlar “Boshqa”ga oʻtkaziladi.":"Записи этой категории будут перенесены в «Другое».","Bu kredit oʻchirilgan boʻlishi mumkin.":"Возможно, этот кредит удалён.","Bu kreditda muddatidan oldin toʻlov bor. Summa, foiz va muddatni oʻzgartirish uchun avval jadvaldan oʻsha toʻlovni bekor qiling. Nom va bankni oʻzgartirish mumkin.":"По этому кредиту есть досрочный платёж. Чтобы изменить сумму, ставку и срок, сначала отмените этот платёж в графике. Название и банк менять можно.","Bu kunda yozuv yoʻq.":"В этот день записей нет.","Bu odam bilan bogʻliq barcha qarz va toʻlov yozuvlari oʻchiriladi.":"Все долги и платежи, связанные с этим человеком, будут удалены.","Bu oyda chiqim yozilmagan.":"В этом месяце расходов нет.","Bu oyda yozuv yoʻq":"В этом месяце записей нет","Bu qarz balansga taʼsir qilmaydi.":"Этот долг не влияет на баланс.","Bu takroriy toʻlov allaqachon toʻxtatilgan":"Этот регулярный платёж уже остановлен","Bu yerda hech kim yoʻq":"Здесь никого нет","Bu yozuv":"Эта запись — платёж по кредиту","Bu yozuv oʻchirilgan boʻlishi mumkin.":"Возможно, эта запись удалена.","Bugun":"Сегодня","Bugun hali yozuv yoʻq":"Сегодня записей ещё нет","Bugun jami":"Итого за сегодня","Bugun sarflandi":"Потрачено сегодня","Bugun yana sarflash mumkin":"Сегодня можно потратить ещё","Bugungi limitdan":"Дневной лимит:","Bular bank qarzni qanday boʻlib olishini bildiradi. Pulni bir xil olasiz, farq — har oy qancha toʻlashingiz va jami qancha foiz ketishida.":"Это способы, которыми банк делит долг на платежи. Сумму вы получаете одинаковую, разница — сколько платить каждый месяц и сколько всего уйдёт на проценты.","Bulutga yozib boʻlmadi — qayta urinamiz":"Не удалось записать в облако — повторим попытку","Bundan keyin toʻlovlar qilingani uchun bu toʻlovni bekor qilib boʻlmaydi.":"Этот платёж нельзя отменить: после него уже были платежи.","Butun jadval ({0})":"Весь график ({0})","Byudjet":"Бюджет","Byudjet belgilansa, bu yerda kunlik limit va sarf chizgʻichi koʻrinadi.":"Если задать бюджет, здесь появятся дневной лимит и шкала расходов.","Byudjet saqlandi":"Бюджет сохранён","Byudjet va kurs":"Бюджет и курс","Byudjet: {0}":"Бюджет: {0}","Byudjetdan":"Бюджет превышен на","Byudjetdan oshdi":"Бюджет превышен","CSV eksport":"Экспорт CSV","Chiqim":"Расход","Chiqim jami":"Итого расходов","Daftar hali toza":"Блокнот пока пуст","Daftar kimniki? Ismingizni yozing — har safar shu nom bilan kutib olamiz.":"Чей это блокнот? Напишите имя — будем встречать вас по нему.","Daftar tayyor. + tugmasi bilan birinchi yozuvni qoʻshing":"Блокнот готов. Добавьте первую запись кнопкой +","Daftarga":"В блокнот","Daftarga qoʻshildi":"Добавлено в блокнот","Davom etish":"Продолжить","Davom etish {0}":"Продолжить {0}","Differensial":"Дифференцированный","Differensialda jami foiz":"При дифференцированной схеме проценты меньше на","Divan":"Диван","Dollar (USD)":"Доллар (USD)","Dollar hisoblar jamini va yangi USD yozuvlarni hisoblash uchun.":"Для подсчёта суммы долларовых счетов и новых записей в USD.","Dollar hisoblar va USD yozuvlar uchun kerak.":"Нужен для долларовых счетов и записей в USD.","Doʻkon":"Магазин","Doʻkon / xizmat":"Магазин / сервис","Doʻst":"Друг","Doʻstga Premium sovgʻa qilish":"Подарить Premium другу","Doʻstga yuborish":"Отправить другу","Doʻstingizga tartibli hisob sovgʻa qiling":"Подарите другу порядок в финансах","Eski kredit boʻlsa — shuncha toʻlov “toʻlangan” deb belgilanadi (chiqim yozilmaydi).":"Для старого кредита — столько платежей отметим как оплаченные (расход не записывается).","Eslatish":"Напомнить","Eslatma matni":"Текст напоминания","Eslatmalar":"Напоминания","Faqat oʻtkazma va qarz yozuvlari":"Только переводы и долги","Farqi nima?":"В чём разница?","Fayl tanlash":"Выбрать файл","Fayl yuklab olindi":"Файл скачан","Fayl yuklab olinmagan boʻlsa, matnni nusxalab saqlang.":"Если файл не скачался, скопируйте текст и сохраните его.","Faylni oʻqib boʻlmadi":"Не удалось прочитать файл","Filtr":"Фильтр","Flat":"Равными долями","Foiz":"Проценты","Foiz jami summadan hisoblandi (≈{0}%) — shartnomadagi bilan solishtiring.":"Ставка рассчитана по общей сумме (≈{0}%) — сверьте с договором.","Foizdan tejaladi":"Экономия на процентах","Foizni tekshiring":"Проверьте ставку","Formani ochish {0}":"Открыть форму {0}","Frilans":"Фриланс","Ha":"Да","Hamma qarzlar yopilgan":"Все долги закрыты","Hammasi":"Все","Hammasi oʻchirildi":"Всё удалено","Hammasini oʻchiramizmi?":"Удалить всё?","Hammasini oʻchirish":"Удалить всё","Hammasini oʻchirmoqchimisiz?":"Удалить всё?","Har hafta":"Каждую неделю","Har hafta · keyingisi {0}":"Каждую неделю · следующий {0}","Har oy":"Каждый месяц","Har oy bir xil summa toʻlaysiz. Boshida toʻlovning koʻp qismi foizga ketadi, oxiriga kelib asosiy qarzga.":"Каждый месяц вы платите одинаковую сумму. Сначала большая часть платежа уходит на проценты, к концу — на основной долг.","Har oy · keyingisi {0}":"Каждый месяц · следующий {0}","Havolani doʻstingizga yuboring — u botni ochib, sovgʻani oladi.":"Отправьте ссылку другу — он откроет бота и получит подарок.","Havolani ochgan odam qarzni botda tasdiqlaydi — ikkalangiz bir xil summani koʻrasiz.":"Получатель подтвердит долг в боте — вы оба увидите одну и ту же сумму.","Hech kim topilmadi":"Никого не найдено","Hech narsa topilmadi":"Ничего не найдено","Hisob":"Счёт","Hisob arxivlandi":"Счёт в архиве","Hisob nomi":"Название счёта","Hisob qaytarildi":"Счёт возвращён","Hisob qoʻshish":"Добавить счёт","Hisob saqlandi":"Счёт сохранён","Hisob-kitob":"Расчёты","Hisob-kitob yopilgan":"Расчёты закрыты","Hisobga":"На счёт","Hisoblar":"Счета","Hisoblar, yozuvlar, qarzlar va kreditlar butunlay oʻchadi. Bu tugmani bilmasdan bosgan boʻlsangiz, “Bekor”ni tanlang.":"Счета, записи, долги и кредиты удалятся полностью. Если нажали случайно — выберите «Отмена».","Hisobni oʻchiramizmi?":"Удалить счёт?","Hisobni oʻchirish":"Удалить счёт","Hisobni tahrirlash":"Редактировать счёт","Hisobni tanlang":"Выберите счёт","Holat":"Статус","Hozir ishlatilgan":"Использовано сейчас","Hozircha eslatma yoʻq — muddatlar joyida.":"Пока напоминаний нет — все сроки в порядке.","Hozirgi hisoblar, yozuvlar, qarzlar va kreditlar zaxiradagisi bilan almashtiriladi.":"Текущие счета, записи, долги и кредиты будут заменены данными из копии.","Hozirgi qarz, soʻm":"Текущий долг, сум","Humo kredit karta":"Кредитная карта Humo","Humo, Naqd, Dollar…":"Humo, Наличные, Доллар…","Ilovada yozilgan toʻlovlar: {0} ta. Koʻproq yozsangiz, ortigʻi “ilovadan oldin toʻlangan” deb belgilanadi (chiqim yozilmaydi).":"Платежей записано в приложении: {0}. Если укажете больше, лишние будут отмечены как «оплачено до приложения» (расход не записывается).","Ilovada {0} ta toʻlov yozilgan — muddat bundan qisqa boʻlolmaydi.":"В приложении записано платежей: {0} — срок не может быть короче.","Ilovada {0} ta toʻlov yozilgan. Kamroq qilish uchun ularni jadvaldan bekor qiling.":"В приложении записано платежей: {0}. Чтобы уменьшить, отмените их в графике.","Ilovadan oldin toʻlangan deb belgilangan":"Отмечено как оплаченное до приложения","Ilovadan oldin toʻlangan oylar":"Оплачено до приложения, мес.","Ilovani boshlagan paytdagi qoldiq. Hozirgi qoldiq shundan va yozuvlardan hisoblanadi.":"Остаток на момент начала работы с приложением. Текущий остаток считается от него и записей.","Imtiyoz":"Льгота","Imtiyozli davr":"Льготный период","Imtiyozli davr, kun":"Льготный период, дней","Internetga ulanib boʻlmadi":"Не удалось подключиться к интернету","Ipoteka":"Ипотека","Ishlatilgan":"Использовано","Ishlatilgan summa":"Использованная сумма","Ishlatilgan summani yangilash":"Обновить использованную сумму","Ishlatilgan: {0} · minimal: {1}":"Использовано: {0} · минимум: {1}","Ism":"Имя","Ism boʻyicha qidirish":"Поиск по имени","Ismingiz":"Ваше имя","Ismingizni yozing":"Введите ваше имя","Ismingizning daftari":"Блокнот · ваше имя","Ismni oʻzgartirish":"Изменить имя","Ismni yozing":"Введите имя","Isteʼmol krediti":"Потребительский кредит","Izoh":"Заметка","Izoh, kategoriya, hisob, summa…":"Заметка, категория, счёт, сумма…","JSON fayl yoki matndan":"Из JSON-файла или текста","JSON notoʻgʻri — faylni tekshiring":"Неверный JSON — проверьте файл","JSON zaxira":"JSON-копия","JSON zaxira faylini tanlang yoki matnini joylashtiring. Hozirgi barcha maʼlumotlar zaxiradagisi bilan almashtiriladi.":"Выберите файл JSON-копии или вставьте его текст. Все текущие данные будут заменены данными из копии.","Jadval oldingi holatiga qaytadi va chiqim yozuvi oʻchiriladi.":"График вернётся к прежнему виду, а запись расхода будет удалена.","Jadval qayta hisoblandi":"График пересчитан","Jami":"Итого","Jami foiz":"Всего процентов","Jami narx":"Итоговая цена","Jami narx {0}":"Итого {0}","Jami narxni yoki tovar narxi va ustama foizini kiriting":"Введите итоговую цену или цену товара и процент наценки","Jami qolgan qarz":"Общий остаток долга","Jami toʻlanadi":"Итого к оплате","Jami toʻlov":"Всего к оплате","Joriy oyga qaytish":"К текущему месяцу","Kafe":"Кафе","Kalendar":"Календарь","Kamida bitta hisob boʻlishi kerak":"Нужен хотя бы один счёт","Kamida bitta hisob nomini yozing":"Введите название хотя бы одного счёта","Karta":"Карта","Karta toʻlovi":"Платёж по карте","Kategoriya":"Категория","Kategoriya oʻchirildi":"Категория удалена","Kategoriya qoʻshish":"Добавить категорию","Kategoriya saqlandi":"Категория сохранена","Kategoriyalar":"Категории","Kecha":"Вчера","Kechirildi":"Прощено","Kechirildi: {0}":"Прощено: {0}","Kechirilgan":"Прощено","Kechirish":"Простить долг","Kelgusi oy":"Будущий месяц","Kelishilgan muddat ({0}) oʻtib ketdi.":"Оговорённый срок ({0}) уже прошёл.","Kelishilgan muddat: {0}.":"Оговорённый срок: {0}.","Keyingi muddat":"Следующий срок","Keyingi oy":"Следующий месяц","Keyingi oylarda bu yozuv avtomatik qoʻshilmaydi. Oldingilari saqlanadi.":"В следующие месяцы эта запись не будет добавляться автоматически. Прежние сохранятся.","Keyingi toʻlov":"Следующий платёж","Keyingi:":"Следующий:","Keyingisi":"Следующий","Kim":"Кто","Kimgadir pul bersangiz yoki olsangiz, shu yerga yozib qoʻying — qoldiq va muddat oʻzi kuzatiladi.":"Если вы дали или взяли деньги в долг, запишите это здесь — остаток и срок будут отслеживаться сами.","Kir yuvish mashinasi":"Стиральная машина","Kirim":"Доход","Kirim / chiqim":"Доход / расход","Kirim va chiqim":"Доходы и расходы","Kiyim":"Одежда","Kompyuter":"Компьютер","Konditsioner":"Кондиционер","Koʻproq imkoniyat, reklamasiz":"Больше возможностей, без рекламы","Koʻrsatish":"Показать","Kredit":"Кредит","Kredit karta":"Кредитная карта","Kredit oʻchirildi":"Кредит удалён","Kredit qoʻshildi":"Кредит добавлен","Kredit qoʻshish":"Добавить кредит","Kredit summasi, soʻm":"Сумма кредита, сум","Kredit summasini kiriting":"Введите сумму кредита","Kredit topilmadi":"Кредит не найден","Kredit toʻliq yopiladi. Toʻlov:":"Кредит будет погашен полностью. Платёж:","Kredit toʻlovi":"Платёж по кредиту","Kredit toʻlovi:":"Платёж по кредиту:","Kredit toʻlovi: {0}":"Платёж по кредиту: {0}","Kredit va toʻlov jadvali oʻchiriladi. Qilingan toʻlovlar chiqim sifatida tarixda qoladi.":"Кредит и график платежей будут удалены. Сделанные платежи останутся в истории как расходы.","Kredit yangilandi":"Кредит обновлён","Kredit yoki qarz haqida":"О кредите или долге","Kredit yopildi":"Кредит закрыт","Kredit yopilgan":"Кредит закрыт","Kredit yoʻq":"Кредитов нет","Kreditga oʻtish":"Перейти к кредиту","Kreditlar":"Кредиты","Kreditni oʻchiramizmi?":"Удалить кредит?","Kreditni oʻchirish":"Удалить кредит","Kreditni tahrirlash":"Редактировать кредит","Kun":"Дней","Kunlik limit = (byudjet − oy chiqimi) ÷ qolgan kunlar. 0 — byudjetsiz.":"Дневной лимит = (бюджет − расход месяца) ÷ оставшиеся дни. 0 — без бюджета.","Kurs":"Курс","Kurs saqlandi":"Курс сохранён","Limit":"Лимит","Limit va ishlatilgan summani kiriting.":"Введите лимит и использованную сумму.","Limit {0}":"Лимит {0}","Limit {0} · bu oy":"Лимит {0} · в этом месяце","Limit {0}, sarflandi {1}":"Лимит {0}, потрачено {1}","Limit, soʻm":"Лимит, сум","Limitni kiriting":"Введите лимит","Limitsiz · bu oy {0}":"Без лимита · в этом месяце {0}","Maosh":"Зарплата","Masalan: Naqd, Humo, Uzcard, Dollar. Keyin Sozlamalarda oʻzgartirish mumkin.":"Например: Наличные, Humo, Uzcard, Доллар. Потом можно изменить в Настройках.","Masalan: Tugʻilgan kuning bilan! Endi pulingiz qayerga ketishini bilasiz 🙂":"Например: С днём рождения! Теперь будешь знать, куда уходят деньги 🙂","Masalan: {0}":"Например: {0}","Mashina":"Автомобиль","Matnda yoʻq: {0} — formada kiriting.":"Нет в тексте: {0} — укажите в форме.","Matnni belgilab, nusxa oling":"Выделите текст и скопируйте","Matnni joylashtiring yoki fayl tanlang":"Вставьте текст или выберите файл","Mavjud":"Доступно","Mavjud {0}":"Доступно {0}","Mavzu":"Тема","Maʼlumotlar":"Данные","Maʼlumotlar Telegram bulutida — faqat sizga koʻrinadi":"Данные в облаке Telegram — видны только вам","Maʼlumotlar shu qurilmada saqlanadi":"Данные хранятся на этом устройстве","Maʼlumotlarni almashtiramizmi?":"Заменить данные?","Mebel":"Мебель","Men qarzdorman":"Я должен","Men qaytarishim kerak:":"Я должен вернуть до:","Men qaytarishim kerak: {0}":"Мне вернуть до: {0}","Menga qarzdor":"Мне должны","Mikroqarz":"Микрозайм","Ming soʻm:":"Тыс. сум:","Minimal toʻlov":"Минимальный платёж","Minimal toʻlov:":"Минимальный платёж:","Minimal toʻlov: {0}":"Минимальный платёж: {0}","Misol: {0} soʻm, {1}% yillik, {2} oy":"Пример: {0} сум, {1}% годовых, {2} мес.","Muddat":"Срок","Muddat belgilanmagan":"Срок не задан","Muddat, oy":"Срок, мес.","Muddat: {0}":"Срок: {0}","Muddatidan oldin toʻlash":"Досрочное погашение","Muddatidan oldin toʻlov":"Досрочный платёж","Muddatidan oldin toʻlov qilingan kreditda shartlarni oʻzgartirib boʻlmaydi. Avval jadvaldan oʻsha toʻlovni bekor qiling.":"Условия кредита с досрочным платежом изменить нельзя. Сначала отмените этот платёж в графике.","Muddatni":"Срок","Muddatni oylarda kiriting":"Укажите срок в месяцах","Muzlatgich":"Холодильник","Namuna bilan sinab koʻring":"Попробуйте на примере","Naqd":"Наличные","Nasiya":"Рассрочка","Nasiya: teng ulush (flat)":"Рассрочка: равными долями (flat)","Natija faqat formani toʻldiradi — saqlashdan oldin tekshirasiz.":"Результат только заполняет форму — проверьте перед сохранением.","Nimadir xato ketdi":"Что-то пошло не так","Nimaga sarflandi":"На что потрачено","Nimani kamaytiramiz":"Что уменьшаем","Nomi":"Название","Nomini yozing":"Введите название","Noutbuk":"Ноутбук","Nusxa olindi":"Скопировано","Nusxa olish":"Копировать","Nusxalab, Telegram yoki SMS orqali yuboring":"Скопируйте и отправьте через Telegram или SMS","Ochiq qarz yoʻq":"Открытых долгов нет","Oddiy soʻz bilan yozing — formani oʻzim toʻldiraman":"Напишите простыми словами — форму я заполню сам","Oldim":"Взял","Oldingi kunlar {0}":"Предыдущие дни {0}","Oldingi oy":"Предыдущий месяц","Oldingi oylar Premium’da ochiladi":"Прошлые месяцы открываются в Premium","Olganlarim":"Я взял","Olingan":"Оформлен","Olingan sana":"Дата получения","Onlayn AI ishlamadi ({0}) — oddiy tahlil natijasi koʻrsatildi.":"Онлайн-AI не сработал ({0}) — показан результат простого разбора.","Orqaga":"Назад","Ortigʻini {0} deb yozish":"Записать излишек: {0}","Ortiqcha toʻlov":"Переплата","Oshdi":"Превышен","Oxirgi oy":"Последний месяц","Oxirgi toʻlov":"Последний платёж","Oxirgi toʻlovni bekor qilish uchun jadvaldagi qatorni bosing.":"Чтобы отменить последний платёж, нажмите на строку в графике.","Oy chiqimi":"Расход за месяц","Oy oxirigacha qoldi":"Осталось до конца месяца","Oy tugashiga {0} kun":"Дней до конца месяца: {0}","Oy yakunlangan":"Месяц завершён","Oylik byudjet":"Месячный бюджет","Oylik byudjet belgilansa, har kuni “bugun yana qancha sarflash mumkin”ligini koʻrsatamiz. Ixtiyoriy.":"Если задать месячный бюджет, мы каждый день будем показывать, «сколько ещё можно потратить сегодня». Необязательно.","Oylik byudjet, soʻm":"Месячный бюджет, сум","Oylik limit, soʻm (ixtiyoriy)":"Месячный лимит, сум (необязательно)","Oylik toʻlov":"Ежемесячный платёж","Oylik toʻlov jami":"Ежемесячные платежи","Oylik toʻlovni":"Платёж","Oziq-ovqat":"Продукты","Oʻchirildi":"Удалено","Oʻchirilganda qilingan toʻlovlar chiqim sifatida tarixda qoladi.":"После удаления сделанные платежи останутся в истории как расходы.","Oʻchirish":"Удалить","Oʻchirish (yozuvlar “Boshqa”ga oʻtadi)":"Удалить (записи перейдут в «Другое»)","Oʻtkazma":"Перевод","Oʻtkazma kirim/chiqim statistikasiga kirmaydi":"Перевод не учитывается в статистике доходов и расходов","Oʻzgarishlarni saqlash":"Сохранить изменения","Pastdagi":"Нажмите","Premium faollashdi — rahmat!":"Premium активирован — спасибо!","Premium haqida":"О Premium","Premium sotuvi tez orada Telegram Stars orqali ochiladi.":"Продажа Premium за Telegram Stars скоро откроется.","Premium sotuvi tez orada ochiladi":"Продажа Premium скоро откроется","Premium sovgʻa qilish":"Подарить Premium","Premium {0}gacha faol. Muddatni uzaytirish mumkin.":"Premium активен до {0}. Можно продлить.","Premium’da":"В Premium","Profil va sozlamalar":"Профиль и настройки","Pul hisobdan chiqadi":"Деньги спишутся со счёта","Pul hisobga tushadi":"Деньги поступят на счёт","Pulingiz qayerlarda turadi? Hisoblaringizni va hozirgi qoldiqlarni yozing.":"Где лежат ваши деньги? Запишите счета и текущие остатки.","Qarz":"Долг","Qarz berdim":"Я дал в долг","Qarz berildi: {0}":"Дал в долг: {0}","Qarz berilgan,":"Дано в долг:","Qarz berilgan, {0}":"Дал в долг {0}","Qarz kechirildi":"Долг прощён","Qarz oldim":"Я взял в долг","Qarz olindi: {0}":"Взял в долг: {0}","Qarz olingan,":"Взято в долг:","Qarz olingan, {0}":"Взял в долг {0}","Qarz oʻchirildi":"Долг удалён","Qarz qaytarildi:":"Долг возвращён:","Qarz qaytarildi: {0}":"Долг возвращён: {0}","Qarz toʻliq yopildi":"Долг полностью закрыт","Qarz toʻliq yopildi ({0} soʻm)":"Долг полностью закрыт ({0} сум)","Qarz va unga tegishli barcha qaytarilgan toʻlovlar oʻchiriladi.":"Долг и все связанные с ним возвраты будут удалены.","Qarz yangilandi":"Долг обновлён","Qarz yozildi":"Долг записан","Qarz yozish":"Записать долг","Qarzlar":"Долги","Qarzlar sofi":"Итого по долгам","Qarzni kechirish":"Простить долг","Qarzni oʻchiramizmi?":"Удалить долг?","Qarzni oʻchirish":"Удалить долг","Qarzni tahrirlash":"Редактировать долг","Qatorni bosib tahrirlash yoki oʻchirish mumkin.":"Нажмите на строку, чтобы изменить или удалить.","Qayerdan":"Откуда","Qayerga":"Куда","Qaysi biri sizda?":"Какой у вас?","Qaysi hisobdan":"С какого счёта","Qaysi qarz":"Какой долг","Qayta yuborish":"Отправить снова","Qaytardi":"Мне вернули","Qaytardim":"Я вернул","Qaytarganimni yozish":"Записать мой возврат","Qaytarib boʻlmaydi":"Нельзя отменить","Qaytarilgan pul":"Возвращённые деньги","Qaytarish muddati":"Срок возврата","Qaytarish muddati:":"Срок возврата:","Qaytarish muddati: {0}":"Срок возврата: {0}","Qaytarishi kerak edi:":"Должны были вернуть:","Qaytarishi kerak edi: {0}":"Должен был вернуть: {0}","Qaytarishim kerak edi:":"Я должен был вернуть:","Qaytarishim kerak edi: {0}":"Я должен был вернуть: {0}","Qaytdi":"Вернули","Qaytgan pulni yozish":"Записать возврат","Qidirish":"Поиск","Qisqartirish":"Свернуть","Qoldiq":"Остаток","Qoldiq:":"Остаток:","Qoldiqqa tenglash ({0})":"Весь остаток ({0})","Qolgan":"Остаток","Qolgan asosiy qarz":"Остаток основного долга","Qolgan qarz":"Остаток долга","Qolgan qarz:":"Остаток долга:","Qolgan toʻlovlar":"Осталось платежей","Qorongʻi":"Тёмная","Qoʻshimcha summa, soʻm":"Дополнительная сумма, сум","Roʻyxat":"Список","SMS’dan yozish":"Запись из SMS","Salom, {0}!":"Привет, {0}!","Salom, {0}! Pulingiz qayerlarda turadi? Hisoblaringizni va hozirgi qoldiqlarni yozing.":"Привет, {0}! Где лежат ваши деньги? Запишите счета и текущие остатки.","Salom, {0}! Sizdan olgan {1} qarzimni yozib qoʻydim. Tasdiqlab qoʻying:":"Привет, {0}! Я записал свой долг вам — {1}. Подтвердите, пожалуйста:","Salom, {0}! Xarajat daftarimga {1} qarzni yozib qoʻydim. Tasdiqlab qoʻying:":"Привет, {0}! Я записал в блокнот Xarajat ваш долг — {1}. Подтвердите, пожалуйста:","Sana":"Дата","Saqlandi":"Сохранено","Saqlandi · {0} takrorlanadi":"Сохранено · повтор {0}","Saqlash":"Сохранить","Server javob bermadi":"Сервер не ответил","Shartnomadagi toʻlov jadvaliga qarang: har oy bir xil summa boʻlsa — annuitet, har oy kamayib borsa — differensial.":"Посмотрите график платежей в договоре: если сумма каждый месяц одинаковая — аннуитетный, если уменьшается — дифференцированный.","Shaxs":"Человек","Shaxs va barcha qarzlarini oʻchirish":"Удалить человека и все его долги","Shu davrda toʻlandi":"Оплачено в этом периоде","Shundan foiz":"Из них проценты","Siz qaytarishingiz kerak":"Вы должны вернуть","Sizda Premium doimiy yoqilgan.":"У вас Premium навсегда.","Sizdagi qarzlar boʻyicha eslatib qoʻymoqchi edim. Umumiy qoldiq: {0} soʻm.":"Хочу напомнить о вашем долге. Общий остаток: {0} сум.","Sizdan qolgan":"Ваш остаток долга","Sizga qaytarishi kerak":"Вам должны вернуть","Sizga yuborilgan":"Вам отправили","Sof, faqat odamlar orasidagi qarzlar":"Итого (нетто), только долги между людьми","Sogʻliq":"Здоровье","Sovgʻa":"Подарок","Sovgʻa cheki":"Подарочный чек","Sovgʻa tayyor":"Подарок готов","Sozlamalar":"Настройки","Soʻm (UZS)":"Сум (UZS)","Soʻnggi yozuvlar":"Последние записи","Soʻrov koʻp — birozdan keyin urinib koʻring":"Слишком много запросов — попробуйте чуть позже","Standart kategoriyalar tayyor: Oziq-ovqat, Transport, Uy/kommunal, Kafe, Aloqa, Sogʻliq, Kiyim, Boshqa; kirim uchun Maosh, Frilans, Boshqa.":"Готовые категории: Продукты, Транспорт, Дом/ЖКХ, Кафе, Связь, Здоровье, Одежда, Другое; для доходов — Зарплата, Фриланс, Другое.","Summa":"Сумма","Summa (UZS)":"Сумма (UZS)","Summa (keyingilari uchun)":"Сумма (для следующих)","Summa qarzdan katta — faqat":"Сумма больше долга — будет оплачено только","Summa qaytarilgan {0} dan kam boʻlolmaydi":"Сумма не может быть меньше уже возвращённых {0}","Summa qoldiqdan":"Сумма больше остатка на","Summa qoldiqdan koʻp — tasdiqlang yoki tenglang":"Сумма больше остатка — подтвердите или выровняйте","Summa, foiz va muddatni kiriting — oylik toʻlov shu yerda chiqadi.":"Введите сумму, ставку и срок — здесь появится ежемесячный платёж.","Summa, soʻm":"Сумма, сум","Summani kiriting":"Введите сумму","Sxema":"Схема","Tahrirlash":"Редактировать","Takroriy":"Повтор","Takroriy toʻlov":"Регулярный платёж","Takroriy toʻlov toʻxtatildi":"Регулярный платёж остановлен","Takroriy toʻlovlar":"Регулярные платежи","Takroriyni toʻxtatamizmi?":"Остановить повтор?","Tanishaylik":"Познакомимся","Tarix":"История","Tasdiqlash uchun":"Для подтверждения введите","Tasdiqlash uchun yuborish":"Отправить на подтверждение","Taʼlim krediti":"Образовательный кредит","Tekin tarif":"Бесплатный тариф","Tekin tarifda joriy va oʻtgan oy koʻrinadi. Oldingi oylar":"В бесплатном тарифе видны текущий и прошлый месяц. Более ранние месяцы","Tekin tarifda:":"В бесплатном тарифе:","Telefon":"Телефон","Telefon (ixtiyoriy)":"Телефон (необязательно)","Telegram Stars bilan bir martalik toʻlov. Avtomatik yechilmaydi.":"Разовая оплата в Telegram Stars. Без автосписаний.","Telegram bulut xotirasi deyarli toʻldi ({0} / 1024 kalit). JSON zaxira oling va eski oylarni tozalashni oʻylab koʻring — aks holda yangi yozuvlar faqat shu qurilmada qoladi.":"Облачное хранилище Telegram почти заполнено (ключей: {0} / 1024). Сделайте JSON-копию и подумайте об очистке старых месяцев — иначе новые записи останутся только на этом устройстве.","Telegram bulutida saqlanadi — boshqa qurilmalarda ham koʻrinadi":"Хранится в облаке Telegram — видно и на других устройствах","Telegram bulutida saqlanadi — boshqa qurilmalarda ham koʻrinadi · {0}/1024 kalit":"Хранится в облаке Telegram — видно и на других устройствах · {0}/1024 ключей","Telegram bulutiga ulanmoqda…":"Подключение к облаку Telegram…","Telegram bulutiga yozib boʻlmadi — maʼlumot shu qurilmada, qayta urinamiz":"Не удалось записать в облако Telegram — данные на этом устройстве, повторим попытку","Telegram eski versiyada — maʼlumot faqat shu qurilmada":"Старая версия Telegram — данные только на этом устройстве","Telegram eski versiyada — maʼlumot faqat shu qurilmada. Ilovani yangilang.":"Старая версия Telegram — данные только на этом устройстве. Обновите приложение.","Telegram ichida fayl saqlab boʻlmaydi — matnni nusxalab, masalan “Saqlangan xabarlar”ga joylang.":"В Telegram нельзя сохранить файл — скопируйте текст и вставьте, например, в «Избранное».","Telegram ichidagi daftar: har bir soʻmni yozasiz, qarz va kreditlarni kuzatasiz — oy oxirida “pul qayerga ketdi?” degan savol qolmaydi.":"Блокнот прямо в Telegram: записываете каждый сум, следите за долгами и кредитами — и в конце месяца не останется вопроса «куда ушли деньги?».","Telegram ilovasini yangilang — toʻlov oynasi ochilmadi":"Обновите Telegram — окно оплаты не открылось","Telegram tashqarisida: maʼlumot faqat shu brauzerda":"Вне Telegram: данные только в этом браузере","Televizor":"Телевизор","Tez orada":"Скоро","Tez orada: qarzni ikkinchi tomon botda tasdiqlaydi.":"Скоро: вторая сторона подтвердит долг в боте.","Tiklash":"Восстановить","Til":"Язык","Tilagingiz shu yerda chiqadi":"Здесь появится ваше пожелание","Tilak (ixtiyoriy)":"Пожелание (необязательно)","Topilmadi":"Не найдено","Tovar narxi":"Цена товара","Tovar narxi jami narxdan katta":"Цена товара больше итоговой цены","Tozalash":"Очистить","Toʻlandi deb belgilash":"Отметить оплаченным","Toʻlangan":"Оплачено","Toʻlangan oylar":"Оплачено месяцев","Toʻlangan:":"Оплачено:","Toʻlangan: {0}{1}":"Оплачено: {0}{1}","Toʻlanmagan deb belgilash":"Отметить неоплаченным","Toʻlash va jadvalni qayta hisoblash":"Оплатить и пересчитать график","Toʻliq nusxa: hisoblar, qarzlar, kreditlar":"Полная копия: счета, долги, кредиты","Toʻliq tarix":"Полная история","Toʻliq yopish ·":"Погасить всё ·","Toʻlov":"Платёж","Toʻlov amalga oshmadi":"Оплата не прошла","Toʻlov bekor qilindi":"Платёж отменён","Toʻlov jadvali":"График платежей","Toʻlov kuni (oyning)":"День платежа (число месяца)","Toʻlov kuni: {0}":"День платежа: {0}","Toʻlov oʻchirildi":"Платёж удалён","Toʻlov qildim":"Внести платёж","Toʻlov sxemalari":"Схемы платежей","Toʻlov sxemasi":"Схема платежей","Toʻlov va qarz muddatini ertalab Telegram’da eslatadi":"Утром напомнит в Telegram о платежах и долгах","Toʻlov yozildi":"Платёж записан","Toʻlovlar":"Платежи","Toʻlovni bekor qilish":"Отменить платёж","Toʻxtatildi":"Остановлено","Toʻxtatilganda oldingi yozuvlar saqlanib qoladi.":"После остановки прежние записи сохранятся.","Toʻxtatish":"Остановить","Transport":"Транспорт","Tugash":"Окончание","Tugaydi: {0}":"Окончание: {0}","Tur":"Тип","Turi":"Тип","Turi:":"Тип:","Tushunganim":"Что я понял","Tushunib olish":"Разобрать","Tushunolmadim. Kredit, nasiya, kredit karta yoki kimgadir bergan/olgan qarzingiz haqida yozing.":"Не понял. Напишите о кредите, рассрочке, кредитной карте или о долге, который вы дали или взяли.","USD kursi":"Курс USD","USD kursi kiritilmagan — dollar hisoblar jamiga qoʻshilmadi.":"Курс USD не указан — долларовые счета не учтены в итоге.","USD kursini kiriting":"Введите курс USD","Ustama":"Наценка","Ustama bilan jami":"Итого с наценкой","Ustama bilan jami narx oylar soniga teng boʻlinadi — har oy bir xil summa toʻlanadi.":"Цена с наценкой делится поровну на число месяцев — каждый месяц платится одна и та же сумма.","Ustama bilan jami narx, soʻm":"Цена с наценкой, сум","Uy/kommunal":"Дом/ЖКХ","Valyuta":"Валюта","Vaqt":"Время","Velosiped":"Велосипед","Xatolik":"Ошибка","Xayrli kech":"Добрый вечер","Xayrli kech, {0}":"Добрый вечер, {0}","Xayrli kun":"Добрый день","Xayrli kun, {0}":"Добрый день, {0}","Xayrli tong":"Доброе утро","Xayrli tong, {0}":"Доброе утро, {0}","Xayrli tun":"Доброй ночи","Xayrli tun, {0}":"Доброй ночи, {0}","Xush kelibsiz, {0}!":"Добро пожаловать, {0}!","Yana hisob":"Ещё счёт","Yana qarz yozish":"Записать ещё долг","Yana {0} ta yozuv oldingi oylarda":"Ещё записей в прошлых месяцах: {0}","Yangi":"Новое","Yangi hisob":"Новый счёт","Yangi kategoriya":"Новая категория","Yangi yozuv":"Новая запись","Yangi · tanishuv":"Новое · знакомство","Yangilandi":"Обновлено","Yillik foiz":"Годовая ставка","Yillik foiz, %":"Годовая ставка, %","Yillik foiz, % (ixtiyoriy)":"Годовая ставка, % (необязательно)","Yopilgan kreditlar ({0})":"Закрытые кредиты ({0})","Yopilgan qarzlar":"Закрытые долги","Yopilgan qarzlar ({0})":"Закрытые долги ({0})","Yopish":"Закрыть","Yorugʻ":"Светлая","Yozuv":"Записи","Yozuv oʻchirildi":"Запись удалена","Yozuv qoʻshish":"Добавить запись","Yozuv qoʻshishda “Takroriy” maydonini tanlang — masalan, ijara yoki maosh har oy oʻzi yoziladi.":"При добавлении записи выберите поле «Повтор» — например, аренда или зарплата будут записываться каждый месяц сами.","Yozuv topilmadi":"Запись не найдена","Yozuv yangilandi":"Запись обновлена","Yozuvlari bor hisobning valyutasini oʻzgartirib boʻlmaydi.":"Нельзя изменить валюту счёта, у которого есть записи.","Yozuvni tahrirlash":"Редактировать запись","Yoʻq":"Нет","Yuborilganlar":"Отправленные","Zaxira tiklandi":"Копия восстановлена","Zaxirada birorta hisob yoʻq — bu faylni tiklab boʻlmaydi. Hozirgi maʼlumotlar oʻzgarmadi.":"В копии нет ни одного счёта — этот файл нельзя восстановить. Текущие данные не изменились.","Zaxiradan tiklash":"Восстановить из копии","asosiy qarz":"основной долг","balansga taʼsirsiz":"без влияния на баланс","bank krediti":"банковский кредит","bank xabarini botga yuborsangiz, yozuv tayyor":"перешлите SMS банка боту — запись готова","barcha oylar: asosiy sahifa, tarix, kalendar va qidiruv":"все месяцы: главная, история, календарь и поиск","belgilanmagan":"не задан","bir oylik":"на месяц","bor":"есть","bugun":"сегодня","bugungi limit":"лимит на сегодня","deb yozing":"","doʻstingiz":"ваш друг","eng foydali":"выгоднее всего","faol":"активен","filtrni tozalash":"сбросить фильтр","foiz":"проценты","ga koʻp. Ortigʻi teskari qarz sifatida yozilishi mumkin.":"— излишек можно записать как встречный долг.","hali olinmagan — qayta yuborish":"ещё не получен — отправить снова","hammasi":"всё","jadval oʻzi tuziladi":"график строится сам","javob kutilmoqda":"ждём ответа","kecha":"вчера","keyingi":"следующий","kim":"кто","kim, qancha, qachon":"кто, сколько, когда","kirim":"доход","kirim-chiqim, qarzlar, kreditlar, byudjet, joriy va oʻtgan oy.":"доходы и расходы, долги, кредиты, бюджет, текущий и прошлый месяц.","kiritilmagan":"не указан","kredit karta":"кредитная карта","kredit va qarzni oddiy matndan toʻldiradi":"заполняет кредит или долг по обычному тексту","kreditining toʻlovi:":"на сумму","masalan, 12 800":"например, 12 800","masalan, 9 000 000":"например, 9 000 000","men qarzdor":"я должен","muddat":"срок","muddatsiz":"без срока","nasiya":"рассрочка","nima uchun, kelishuv…":"за что, договорённость…","nomi · qoldiq":"название · остаток","oldi: {0}":"получил: {0}","olindi":"получен","oʻtdi":"просрочен","pulingiz qayerga ketyapti?":"куда уходят ваши деньги?","qaytardi":"вернул(а)","rad etdi":"отклонил","reklamasiz":"без рекламы","siz qarzdorsiz":"вы должны","sizda shu":"у вас","sizga qarzdor":"должен вам","sovgʻa":"подарок","soʻm":"сум","soʻm kam, lekin birinchi oyda toʻlov":"сум, но первый платёж больше на","soʻm kechirilgan deb belgilanadi. Qarz yopiladi va arxivga oʻtadi. Hisob qoldigʻi oʻzgarmaydi.":"сум будет отмечено как прощённое. Долг закроется и уйдёт в архив. Остаток счёта не изменится.","soʻm koʻproq.":"сум.","soʻm oshadi":"сум перерасхода","soʻm oshdi":"сум","soʻm qoladi":"сум останется","soʻm toʻlanadi.":"сум.","soʻm, shundan foiz":"сум, из них проценты","soʻm, {0}, {1}. Uni kredit sahifasidagi jadvaldan bekor qilish mumkin — shunda jadval ham toʻgʻri qoladi.":"сум, {0}, {1}. Его можно отменить в графике на странице кредита — тогда график останется верным.","soʻm.":"сум.","soʻm. Summani kiriting.":"сум. Введите сумму.","soʻmga oshadi":"сум","takroriy":"повтор","tasdiqladi":"подтвердил","tekin tarif":"бесплатный тариф","tekin: 2 oy":"бесплатно: 2 мес.","tovar narxi yoki jami narx":"цена товара или итоговая цена","toʻlandi":"оплачено","toʻlangan":"оплачено","toʻlov kuni":"день платежа","toʻlov va qarz muddatini Telegram’da eslatadi":"напоминает в Telegram о платежах и долгах","tugmasi bilan birinchi yozuvni qoʻshing.":"внизу, чтобы добавить первую запись.","u qarzdor":"он должен","yillik foiz":"годовая ставка","yoqilgan":"включено","yozish":"написать","{0} (kirim)":"{0} (доход)","{0} / {1} toʻlangan":"Оплачено {0} из {1}","{0} / {1} toʻlov":"Платежей: {0} / {1}","{0} Hisob qoʻshish":"{0} Добавить счёт","{0} Kategoriya qoʻshish":"{0} Добавить категорию","{0} Orqaga":"{0} Назад","{0} Shu kunga yozish":"{0} Записать на этот день","{0} Yana hisob":"{0} Ещё счёт","{0} Yana qarz yozish":"{0} Записать ещё долг","{0} chiqimi":"{0}: расход","{0} kartasi":"Карта {0}","{0} kirimi":"{0}: доход","{0} kishi":"{0} чел.","{0} krediti":"Кредит {0}","{0} kun":"{0} дн.","{0} kun oʻtdi":"Просрочено дней: {0}","{0} kun qoldi":"Осталось дней: {0}","{0} limiti":"Лимит: {0}","{0} limitidan":"{0}: от лимита","{0} nima degani":"Что значит {0}","{0} oy":"{0} мес.","{0} qaytardi":"{0} вернул(а)","{0} qaytdi":"возвращено {0}","{0} qoldi":"осталось {0}","{0} sarflandi":"потрачено {0}","{0} soʻm":"{0} сум","{0} ta":"{0} шт.","{0} ta qarz":"долгов: {0}","{0} ta qarz, {1}":"Долгов: {0}, {1}","{0} ta topildi":"Найдено: {0}","{0} ta toʻlov muddati oʻtdi":"Просрочено платежей: {0}","{0} ta toʻlov oʻtib ketdi,":"Просрочено платежей: {0}, первый","{0} ta toʻlov oʻtib ketdi, {1}":"Просрочено платежей: {0}, с {1}","{0} ta yozuv":"Записей: {0}","{0} {1} · yopildi {2}":"{0} {1} · закрыт {2}","{0} · boshlangʻich {1}":"{0} · начальный {1}","{0} · keyingisi {1}":"{0} · следующий {1}","{0} · muddat {1}":"{0} · срок {1}","{0} · qarz":"{0} · долг","{0} · tanishuv":"{0} · знакомство","{0} ⭐ — Premium olish":"{0} ⭐ — купить Premium","{0} ⭐ — muddatni uzaytirish":"{0} ⭐ — продлить","{0} ⭐ — sovgʻani olish":"{0} ⭐ — купить подарок","{0}% qaytdi":"Возвращено {0}%","{0}% yillik":"{0}% годовых","{0}, statistika oʻzgarmaydi":"{0}, статистика не меняется","{0}-toʻlov":"Платёж №{0}","{0}: minimal toʻlov {1} soʻm":"{0}: минимальный платёж {1} сум","{0}: {1} soʻm":"{0}: {1} сум","{0}: {1} soʻm toʻlov":"{0}: платёж {1} сум","{0}: {1} soʻm, {2}% yillik, {3} oy":"{0}: {1} сум, {2}% годовых, {3} мес.","{0}ning daftari":"Блокнот · {0}","{0}{1} toʻlovini qildim":"{0}Внести платёж за {1}","· foiz":"· проценты","· takroriy":"· повтор","· turini oʻzgartirib boʻlmaydi":"· тип изменить нельзя","· {0} soʻm":"· {0} сум","· {0}/1024 kalit":"· ключей: {0}/1024","’da ochiladi. Maʼlumotlaringiz oʻchmaydi — saqlanib turadi.":". Ваши данные не удаляются — они сохраняются.","“Kredit” kategoriyasida chiqim yoziladi va hisob qoldigʻidan ayriladi.":"Расход записывается в категорию «Кредит» и списывается с остатка счёта.","“{0}” boʻyicha hech kim yoʻq. Ismni boshqacha yozib koʻring.":"По запросу «{0}» никого нет. Попробуйте написать имя иначе.","“{0}” hisobida yozuv yoʻq — u butunlay oʻchiriladi.":"На счёте «{0}» нет записей — он будет удалён полностью.","“{0}” oʻchirilsinmi?":"Удалить «{0}»?","№ 001 · shaxsiy moliya daftari":"№ 001 · блокнот личных финансов","≈{0} ⭐ / oy":"≈{0} ⭐ / мес."}/*END_I18N_RU*/;
+const CYR_MAP = { a: 'а', b: 'б', c: 'с', d: 'д', e: 'е', f: 'ф', g: 'г', h: 'ҳ', i: 'и', j: 'ж', k: 'к', l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', q: 'қ', r: 'р', s: 'с', t: 'т', u: 'у', v: 'в', w: 'в', x: 'х', y: 'й', z: 'з' };
+/** Uzbek Latin → Cyrillic; keeps {n} placeholders, URLs and ACRONYMS */
+function uzCyr(s) {
+  return String(s).replace(/\{\d+\}|https?:\S+|\b[A-Z]{2,5}\b(?![ʻʼ'‘’])|([OoGg][ʻ'‘’]|[Ss][Hh]|[Cc][Hh]|[Yy][OoUuAaEe]|ʼ|[A-Za-z])/g, (m, g, off, str) => {
+    if (!g) return m;
+    if (g === 'ʼ') return 'ъ';
+    const low = g.toLowerCase(), isUp = g[0] !== low[0], allUp = g.length > 1 && g === g.toUpperCase() && /[A-Z]{2}/.test(g.replace(/[ʻ'‘’]/, 'X'));
+    let r;
+    if (/^[og][ʻ'‘’]$/.test(low)) r = low[0] === 'o' ? 'ў' : 'ғ';
+    else if (low === 'sh') r = 'ш'; else if (low === 'ch') r = 'ч';
+    else if (low === 'yo') r = 'ё'; else if (low === 'yu') r = 'ю'; else if (low === 'ya') r = 'я'; else if (low === 'ye') r = 'е';
+    else if (low === 'e') { const prev = str[off - 1]; r = !prev || !/[A-Za-zʻʼ'‘’]/.test(prev) ? 'э' : 'е'; }
+    else r = CYR_MAP[low] || g;
+    const nextUp = str[off + g.length] && /[A-Z]/.test(str[off + g.length]);
+    return (allUp || (isUp && nextUp)) ? r.toUpperCase() : isUp ? r[0].toUpperCase() + r.slice(1) : r;
+  });
+}
+const I18N_CACHE = {};
+/** a word whose Russian depends on context (same Uzbek key elsewhere means something else) */
+const L3 = (uz, ru) => raw(`<span translate="no">${esc(LANG === 'ru' ? ru : LANG === 'uz-Cyrl' ? uzCyr(uz) : uz)}</span>`);
+/** exact map + {n} patterns for the current language */
+function i18nTable() {
+  if (I18N_CACHE[LANG]) return I18N_CACHE[LANG];
+  const exact = new Map(), pats = [];
+  for (const k of Object.keys(I18N_RU)) {
+    const v = LANG === 'ru' ? I18N_RU[k] : uzCyr(k);
+    if (!/\{\d+\}/.test(k)) { exact.set(k, v); continue; }
+    const order = [];
+    const src = k.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{(\d+)\}/g, (_, n) => { order.push(+n); return '([\\s\\S]+?)'; });
+    pats.push({ re: new RegExp('^' + src + '$'), v, order, w: k.replace(/\{\d+\}/g, '').length });
+  }
+  pats.sort((a, b) => b.w - a.w);
+  return (I18N_CACHE[LANG] = { exact, pats });
+}
+/** translate one app string (used for strings that never reach the DOM, e.g. native dialogs) */
+function T(s) {
+  if (LANG === 'uz' || s == null) return s;
+  const t = String(s).trim(); if (!t) return s;
+  const { exact, pats } = i18nTable();
+  let out = exact.get(t);
+  if (out == null) {
+    for (const p of pats) {
+      const m = p.re.exec(t); if (!m) continue;
+      out = p.v.replace(/\{(\d+)\}/g, (_, n) => { const i = p.order.indexOf(+n); return i >= 0 ? m[i + 1] : ''; });
+      break;
+    }
+  }
+  return out == null ? s : String(s).replace(t, out);
+}
+const I18N_SKIP = /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/;
+/** swap app strings inside a DOM subtree to the current language */
+function i18nTree(root) {
+  if (LANG === 'uz' || !root) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => {
+    for (let p = n.parentNode; p && p !== root.parentNode; p = p.parentNode) { if (p.nodeType === 1 && (I18N_SKIP.test(p.nodeName) || p.getAttribute('translate') === 'no')) return NodeFilter.FILTER_REJECT; }
+    return /[A-Za-z]/.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+  } });
+  const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+  for (const n of nodes) { const v = T(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; }
+  const els = root.nodeType === 1 ? [root, ...root.querySelectorAll('[placeholder],[aria-label],[title]')] : [];
+  for (const el of els) for (const a of ['placeholder', 'aria-label', 'title']) { const v = el.getAttribute && el.getAttribute(a); if (v && /[A-Za-z]/.test(v)) { const t = T(v); if (t !== v) el.setAttribute(a, t); } }
+}
+function curLang() { const l = (S.settings && S.settings.lang) || UIP.lang || 'uz'; return LANGS.some(x => x[0] === l) ? l : 'uz'; }
+function setLang(l) {
+  UIP.lang = l; saveUIP();
+  if (S.settings) { S.settings.lang = l; commit(['settings'], { render: false }); }
+  LANG = l; document.documentElement.lang = l === 'ru' ? 'ru' : 'uz';
+  // default onboarding account names follow the language until the user edits them
+  const DEF_ACC = [['Naqd', 'Наличные', 'Нақд'], ['Karta', 'Карта', 'Карта']];
+  if (typeof OB !== 'undefined') for (const a of OB.accounts) { const row = DEF_ACC.find(r => r.includes(a.name)); if (row) a.name = row[l === 'ru' ? 1 : l === 'uz-Cyrl' ? 2 : 0]; }
+  render();
+  if (typeof meRefresh === 'function') meRefresh();
+}
+/* localized date pieces */
+const tl = s => (LANG === 'uz-Cyrl' ? uzCyr(s) : s);
+const monName = i => (LANG === 'ru' ? RU_D.MON[i] : tl(MON[i]));
+const monShort = i => (LANG === 'ru' ? RU_D.MONS[i] : tl(MONS[i]));
+const wdName = i => (LANG === 'ru' ? RU_D.WD[i] : tl(WD[i]));
+const dsep = () => (LANG === 'ru' ? ' ' : '-');
 const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
-const monthTitle = ym => cap(MON[+ym.slice(5, 7) - 1]);
+const monthTitle = ym => cap(LANG === 'ru' ? RU_D.MONN[+ym.slice(5, 7) - 1] : tl(MON[+ym.slice(5, 7) - 1]));
 const sameYear = s => s.slice(0, 4) === today().slice(0, 4);
-const dLong = s => { const d = parseD(s); return `${d.getDate()}-${MON[d.getMonth()]}, ${WD[d.getDay()]}`; };
-const dMid = s => { const d = parseD(s); return `${d.getDate()}-${MON[d.getMonth()]}` + (sameYear(s) ? '' : ` ${d.getFullYear()}`); };
-const dShort = (s, yr) => { const d = parseD(s); return `${d.getDate()}-${MONS[d.getMonth()]}` + (yr || !sameYear(s) ? ` ${d.getFullYear()}` : ''); };
+const dLong = s => { const d = parseD(s); return `${d.getDate()}${dsep()}${monName(d.getMonth())}, ${wdName(d.getDay())}`; };
+const dMid = s => { const d = parseD(s); return `${d.getDate()}${dsep()}${monName(d.getMonth())}` + (sameYear(s) ? '' : ` ${d.getFullYear()}`); };
+const dShort = (s, yr) => { const d = parseD(s); return `${d.getDate()}${dsep()}${monShort(d.getMonth())}` + (yr || !sameYear(s) ? ` ${d.getFullYear()}` : ''); };
 const dNum = s => `${s.slice(8, 10)}.${s.slice(5, 7)}.${s.slice(0, 4)}`;
 function dayHead(s) {
   const k = diffDays(today(), s);
   if (k === 0) return 'Bugun';
   if (k === 1) return 'Kecha';
-  return cap(WD[parseD(s).getDay()]);
+  return cap(wdName(parseD(s).getDay()));
 }
 function relDays(due, t = today()) {
   const k = diffDays(due, t);
@@ -879,7 +999,7 @@ function defaultCats() {
     { id: 'other-inc', name: 'Boshqa', type: 'inc', icon: 'grid' },
   ];
 }
-const defaultSettings = () => ({ v: 1, onboarded: false, welcomed: false, name: '', accounts: [], cats: defaultCats(), budget: 0, usdRate: 0, theme: 'auto', recurring: [], _u: 0 });
+const defaultSettings = () => ({ v: 1, onboarded: false, welcomed: false, name: '', lang: 'uz', accounts: [], cats: defaultCats(), budget: 0, usdRate: 0, theme: 'light', themeV: 2, recurring: [], _u: 0 });
 const emptyState = () => ({ settings: null, debts: { people: [], debts: [], payments: [], _u: 0 }, loans: { loans: [], payments: [], _u: 0 }, months: {} });
 
 let S = emptyState();
@@ -901,7 +1021,9 @@ function normalizeState() {
   for (const k in S.months) if (!S.months[k] || !Array.isArray(S.months[k].tx)) S.months[k] = { tx: [], _u: 0 };
   if (S.settings) {
     const d = defaultSettings();
+    const hadThemeV = S.settings.themeV;
     S.settings = Object.assign(d, S.settings);
+    if (!hadThemeV) { if (S.settings.theme === 'auto') S.settings.theme = 'light'; S.settings.themeV = 2; } // the app now opens in the light (day) theme
     if (!S.settings.cats.some(c => c.id === 'credit')) S.settings.cats.push(defaultCats().find(c => c.id === 'credit'));
   }
 }
@@ -950,6 +1072,7 @@ function allTx() {
 
 /** Record a change: stamp docs, persist locally, queue cloud writes, re-render */
 function commit(ids, opts = {}) {
+  if (ids.includes('loans') || ids.includes('debts')) { if (typeof remindersSync === 'function') remindersSync(true); }
   const now = Date.now();
   for (const id of new Set(ids)) { const d = getDoc(id); if (d) d._u = now; Sync.queue(id); }
   VER++;
@@ -1158,7 +1281,9 @@ const Sync = {
 const accById = id => S.settings.accounts.find(a => a.id === id);
 const catById = id => S.settings.cats.find(c => c.id === id);
 const accName = id => (accById(id) || {}).name || '—';
-const catName = id => (catById(id) || {}).name || 'Boshqa';
+const DEF_CAT_NAMES = new Set(defaultCats().map(c => c.name));
+/** category name; the built-in ones follow the app language */
+const catName = id => { const n = (catById(id) || {}).name || 'Boshqa'; return DEF_CAT_NAMES.has(n) ? T(n) : n; };
 const personById = id => S.debts.people.find(p => p.id === id);
 const loanById = id => S.loans.loans.find(l => l.id === id);
 const rateOr = r => r || S.settings.usdRate || 0;
@@ -1457,12 +1582,12 @@ function txTitle(t) {
 }
 function txSub(t, withDate) {
   const parts = [];
-  if (t.type === 'tr') parts.push(t.note ? `${accName(t.accId)} → ${accName(t.toAccId)}` : 'Oʻtkazma');
+  if (t.type === 'tr') parts.push(t.note ? `${accName(t.accId)} → ${accName(t.toAccId)}` : T('Oʻtkazma'));
   else { if (t.note) parts.push(catName(t.catId)); parts.push(accName(t.accId)); }
   let s = parts.join(' · ');
-  if (withDate) s += ', ' + (withDate === 'rel' ? (dayHead(t.date) === 'Bugun' ? 'bugun' : dayHead(t.date) === 'Kecha' ? 'kecha' : dShort(t.date)) : dShort(t.date)) + (t.time ? ' ' + t.time : '');
+  if (withDate) s += ', ' + (withDate === 'rel' ? (dayHead(t.date) === 'Bugun' ? T('bugun') : dayHead(t.date) === 'Kecha' ? T('kecha') : dShort(t.date)) : dShort(t.date)) + (t.time ? ' ' + t.time : '');
   else if (t.time) s += ', ' + t.time;
-  if (t.recId) s += ' · takroriy';
+  if (t.recId) s += ' · ' + T('takroriy');
   if (t.currency === 'USD' && t.rate) s += ` · ${fmt(t.uzs)} soʻm`;
   return s;
 }
@@ -1482,13 +1607,13 @@ function debtEvents(filterFn) {
   const ev = [], pays = S.debts.payments;
   for (const d of S.debts.debts) {
     const p = personById(d.pid); if (!p) continue;
-    if (filterFn(d.date)) ev.push({ virt: true, id: 'v' + d.id, date: d.date, time: '', pid: d.pid, title: (d.dir === 'given' ? 'Qarz berildi: ' : 'Qarz olindi: ') + p.name, sub: d.affectsBalance ? accName(d.accId) : 'balansga taʼsirsiz', amount: d.amount, currency: d.currency, sign: d.dir === 'given' ? -1 : 1, createdAt: d.createdAt });
+    if (filterFn(d.date)) ev.push({ virt: true, id: 'v' + d.id, date: d.date, time: '', pid: d.pid, title: (d.dir === 'given' ? 'Qarz berildi: ' : 'Qarz olindi: ') + p.name, sub: d.affectsBalance ? accName(d.accId) : T('balansga taʼsirsiz'), amount: d.amount, currency: d.currency, sign: d.dir === 'given' ? -1 : 1, createdAt: d.createdAt });
   }
   for (const q of pays) {
     const d = S.debts.debts.find(x => x.id === q.debtId); if (!d) continue;
     const p = personById(d.pid); if (!p || !filterFn(q.date)) continue;
     const title = q.kind === 'forgive' ? 'Kechirildi: ' + p.name : d.dir === 'given' ? p.name + ' qaytardi' : 'Qarz qaytarildi: ' + p.name;
-    ev.push({ virt: true, id: 'v' + q.id, date: q.date, time: '', pid: d.pid, title, sub: q.kind === 'forgive' ? 'balansga taʼsirsiz' : (q.accId ? accName(q.accId) : 'balansga taʼsirsiz'), amount: q.amount, currency: d.currency, sign: q.kind === 'forgive' ? 0 : d.dir === 'given' ? 1 : -1, createdAt: q.createdAt });
+    ev.push({ virt: true, id: 'v' + q.id, date: q.date, time: '', pid: d.pid, title, sub: q.kind === 'forgive' ? T('balansga taʼsirsiz') : (q.accId ? accName(q.accId) : T('balansga taʼsirsiz')), amount: q.amount, currency: d.currency, sign: q.kind === 'forgive' ? 0 : d.dir === 'given' ? 1 : -1, createdAt: q.createdAt });
   }
   return ev;
 }
@@ -1530,7 +1655,7 @@ function budgetRuler(segs, budget, spent) {
   if (budget > 0 && spent < budget) {
     const rw = W - sx;
     g += `<rect x="${(sx + .75).toFixed(1)}" y="${Y + .75}" width="${Math.max(rw - 1.5, 0).toFixed(1)}" height="${H - 1.5}" style="fill:var(--sig-soft);stroke:var(--sig)" stroke-width="1.5"/>`;
-    const txt = `${compact(budget - spent)} qoldi`;
+    const txt = T(`${compact(budget - spent)} qoldi`);
     if (rw > txt.length * 7.8 + 10) g += `<text class="svt" x="${(sx + rw / 2).toFixed(1)}" y="${Y + 17.5}" text-anchor="middle" font-size="12.5" font-weight="700" style="fill:var(--sig)">${esc(txt)}</text>`;
     else if (rw > compact(budget - spent).length * 7.8 + 10) g += `<text class="svt" x="${(sx + rw / 2).toFixed(1)}" y="${Y + 17.5}" text-anchor="middle" font-size="12.5" font-weight="700" style="fill:var(--sig)">${esc(compact(budget - spent))}</text>`;
     else if (sx > W * 0.5) qoldiAbove = txt;
@@ -1539,7 +1664,7 @@ function budgetRuler(segs, budget, spent) {
     const bx = budget / M * W;
     g += `<path d="M${bx.toFixed(1)} ${Y - 4}V${Y + H + 3}" style="stroke:var(--dng)" stroke-width="2" stroke-dasharray="3 2"/>`;
   }
-  const lbl = `${compact(spent)} sarflandi`;
+  const lbl = T(`${compact(spent)} sarflandi`);
   const left = sx > W * 0.5;
   if (qoldiAbove && sx + 8 + qoldiAbove.length * 7.6 <= W) g += `<text class="svt" x="${(sx + 6).toFixed(1)}" y="${Y - 9}" text-anchor="start" font-size="12.5" font-weight="700" style="fill:var(--sig)">${esc(qoldiAbove)}</text>`;
   g += `<path d="M${Math.max(sx, .75).toFixed(1)} ${Y - 7}V${Y + H + 3}" style="stroke:var(--ink)" stroke-width="1.5"/>`;
@@ -1551,10 +1676,10 @@ function budgetRuler(segs, budget, spent) {
     if (i % 6 === 0) {
       const v = M * i / 18;
       const s = i === 0 ? '0' : mln ? String(Math.round(v / 1e5) / 10).replace('.', ',') : String(Math.round(v / 1e3));
-      g += `<text class="svt" x="${(i / 18 * W).toFixed(1)}" y="${Y + H + 25}" text-anchor="${i === 0 ? 'start' : i === 18 ? 'end' : 'middle'}" font-size="12" style="fill:var(--muted)">${s}${i === 18 ? (mln ? ' mln' : ' ming') : ''}</text>`;
+      g += `<text class="svt" x="${(i / 18 * W).toFixed(1)}" y="${Y + H + 25}" text-anchor="${i === 0 ? 'start' : i === 18 ? 'end' : 'middle'}" font-size="12" style="fill:var(--muted)">${s}${i === 18 ? unitTxt(mln ? 'mln' : 'ming') : ''}</text>`;
     }
   }
-  return raw(`<svg width="${W}" height="${Y + H + 30}" viewBox="0 0 ${W} ${Y + H + 30}" style="margin-top:16px;overflow:visible" role="img" aria-label="Byudjet: ${esc(lbl)}">${g}</svg>`);
+  return raw(`<svg width="${W}" height="${Y + H + 30}" viewBox="0 0 ${W} ${Y + H + 30}" style="margin-top:16px;overflow:visible" role="img" aria-label="${esc(T('Byudjet'))}: ${esc(lbl)}" translate="no">${g}</svg>`);
 }
 function progressRuler(frac, labelIn, labelOut) {
   const W = contentW(), H = 22, Y = 4, x = Math.max(0, Math.min(1, frac)) * W;
@@ -1625,7 +1750,7 @@ function buildAlerts() {
   for (const c of S.settings.cats) {
     if (c.type !== 'exp' || !c.limit) continue;
     const sp = st.byCat[c.id] || 0;
-    if (sp > c.limit) out.push({ href: '#sozlamalar', title: c.name + ' limiti', sub: `Limit ${fmt(c.limit)}, sarflandi ${fmt(sp)}`, amount: '+' + fmt(sp - c.limit), late: true, k: 0, stamp: 'Oshdi' });
+    if (sp > c.limit) out.push({ href: '#sozlamalar', title: catName(c.id) + ' limiti', sub: `Limit ${fmt(c.limit)}, sarflandi ${fmt(sp)}`, amount: '+' + fmt(sp - c.limit), late: true, k: 0, stamp: 'Oshdi' });
   }
   out.sort((a, b) => (b.late - a.late) || (a.k - b.k));
   return out;
@@ -1835,7 +1960,7 @@ function viewKalendar() {
     cells.push(html`<button class="${cls}" data-act="calDay" data-d="${ds}" aria-label="${dMid(ds)}: ${fmt(v)} soʻm"><span class="d mono">${d}</span><span class="v mono">${fut ? '' : v ? calVal(v) : '0'}</span></button>`);
   }
   while (cells.length % 7) cells.push(html`<div aria-hidden="true"></div>`);
-  const wd = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'].map(w => html`<div>${w}</div>`);
+  const wd = (LANG === 'ru' ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'].map(tl)).map(w => html`<div translate="no">${w}</div>`);
   const k = v => grp(Math.round(v / 1000));
   let detail = '';
   if (sel) {
@@ -1860,9 +1985,9 @@ function personMeta(P) {
   const ds = P.open.slice().sort((a, b) => a.date < b.date ? -1 : 1);
   const main = ds.filter(d => (P.net >= 0 ? d.dir === 'given' : d.dir === 'taken'));
   const d0 = (main.length ? main : ds)[main.length ? main.length - 1 : 0];
-  const verb = d0.dir === 'given' ? 'Berdim' : 'Oldim';
-  const dueTxt = P.nextDue ? 'muddat ' + dShort(P.nextDue) : 'muddatsiz';
-  return ds.length > 1 ? `${ds.length} ta qarz, ${dueTxt}` : `${verb} ${dShort(d0.date)}, ${dueTxt}`;
+  const verb = T(d0.dir === 'given' ? 'Berdim' : 'Oldim');
+  const dueTxt = P.nextDue ? T('muddat') + ' ' + dShort(P.nextDue) : T('muddatsiz');
+  return ds.length > 1 ? `${T(ds.length + ' ta qarz')}, ${dueTxt}` : `${verb} ${dShort(d0.date)}, ${dueTxt}`;
 }
 function personPaidPct(P) {
   const pays = S.debts.payments;
@@ -1909,6 +2034,7 @@ function viewQarzlar() {
       </div>
       <div class="lbl" style="font-size:13.5px;margin-top:10px">Bank kreditlari bu hisobga kirmaydi, ular Kreditlar boʻlimida.</div>
     </section>
+    ${toMeSection()}
     ${any ? html`
     <div class="types scroll-x" style="margin-top:24px">
       <button class="${tab === 'all' ? 'on' : ''}" data-act="debtTab" data-t="all">Hammasi <span class="mono">${owe.length + iowe.length}</span></button>
@@ -1966,7 +2092,7 @@ function viewQarz(pid) {
   const dash = html`<span style="color:var(--muted)">–</span>`;
   const tr = rows.map(r => {
     const name = r.kind === 'debt' ? (r.d.dir === 'given' ? 'Qarz berdim' : 'Qarz oldim') : r.kind === 'forgive' ? 'Kechirildi' : r.d.dir === 'given' ? 'Qaytardi' : 'Qaytardim';
-    const sub = r.kind === 'forgive' ? 'balansga taʼsirsiz' : r.kind === 'debt' ? (r.d.affectsBalance ? accName(r.d.accId) : 'balansga taʼsirsiz') : (r.p.accId ? accName(r.p.accId) : '—');
+    const sub = r.kind === 'forgive' ? T('balansga taʼsirsiz') : r.kind === 'debt' ? (r.d.affectsBalance ? accName(r.d.accId) : T('balansga taʼsirsiz')) : (r.p.accId ? accName(r.p.accId) : '—');
     const amt = money(r.amount, r.currency);
     const c3v = r.kind === 'debt' ? (mixed ? (r.d.dir === 'given' ? '+' : MINUS) + amt : amt) : '';
     const c4v = r.kind !== 'debt' ? amt : '';
@@ -2003,6 +2129,7 @@ function viewQarz(pid) {
       ${openGiven.length ? html`<button class="btn ghost" data-act="remind">${ic('bell', 19, 1.6)}Eslatish</button>` : ''}
       <button class="btn ghost" data-act="forgive" ${openGiven.length ? '' : raw('style="grid-column:1/-1"')}>${ic('gift', 19, 1.6)}Kechirish</button>
     </div>` : ''}
+    ${sm.open.length ? shareButton(sm) : ''}
     <button class="more" data-act="addDebt" data-pid="${pid}" style="margin-top:10px">${ic('plus', 16, 2)} Yana qarz yozish</button>
   </div>`;
 }
@@ -2069,7 +2196,7 @@ function loanCard(l) {
     const cs = calc.cardSummary(l, S.loans.payments);
     const rd = relDays(cs.nextDue);
     return html`<a class="contract" href="#kredit-${l.id}"><div class="in">
-      <div class="ctop"><div><div class="serif">${l.name}</div><div class="lbl" style="font-size:14px;margin-top:2px">${l.lender ? l.lender + ', ' : ''}kredit karta</div></div><span style="color:var(--muted);padding-top:4px">${ic('chevR', 20)}</span></div>
+      <div class="ctop"><div><div class="serif">${l.name}</div><div class="lbl" style="font-size:14px;margin-top:2px">${l.lender ? l.lender + ', ' : ''}${T('kredit karta')}</div></div><span style="color:var(--muted);padding-top:4px">${ic('chevR', 20)}</span></div>
       <div class="terms"><div>Limit<span class="mono">${compact(cs.limit)}</span></div><div>Imtiyoz<span class="mono">${l.grace ? l.grace + ' kun' : '—'}</span></div><div>Foiz<span class="mono">${l.rate || 0}%</span></div></div>
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="lbl">Ishlatilgan</span><span class="mono owed" style="font-size:22px">${fmt(cs.used)}</span></div>
       ${contBar(cs.frac, W)}
@@ -2081,15 +2208,15 @@ function loanCard(l) {
   const flat = l.scheme === 'flat';
   const terms = flat
     ? [['Sxema', 'Flat'], ['Ustama', l.principal && l.principal < l.total ? Math.round((l.total / l.principal - 1) * 100) + '%' : '—'], ['Muddat', l.term + ' oy']]
-    : [['Sxema', SCHEME_NAME[l.scheme]], ['Foiz', l.rate + '% yillik'], ['Muddat', l.term + ' oy']];
+    : [['Sxema', T(SCHEME_NAME[l.scheme])], ['Foiz', l.rate + '% yillik'], ['Muddat', l.term + ' oy']];
   const late = s.overdue.length > 0;
   const rd = s.next ? relDays(s.next.due) : null;
   return html`<a class="contract" href="#kredit-${l.id}"><div class="in">
-    <div class="ctop"><div><div class="serif">${l.name}</div><div class="lbl" style="font-size:14px;margin-top:2px">${l.lender ? l.lender + ', ' : ''}${TYPE_NAME[l.type]}</div></div><span style="color:var(--muted);padding-top:4px">${ic('chevR', 20)}</span></div>
+    <div class="ctop"><div><div class="serif">${l.name}</div><div class="lbl" style="font-size:14px;margin-top:2px">${l.lender ? l.lender + ', ' : ''}${T(TYPE_NAME[l.type])}</div></div><span style="color:var(--muted);padding-top:4px">${ic('chevR', 20)}</span></div>
     <div class="terms">${terms.map(([k, v]) => html`<div>${k}<span class="mono">${v}</span></div>`)}</div>
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="lbl">Qolgan qarz</span><span class="mono owed" style="font-size:22px">${fmt(s.remaining)}</span></div>
     ${payRuler(s.count, s.paidCount, W, late)}
-    <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:13.5px;color:var(--muted)"><span>${s.paidCount} / ${s.count} toʻlangan</span><span class="mono" style="word-spacing:-.25em">${flat ? 'Jami narx ' + fmt(l.total) : Math.round(s.paidCount / (s.count || 1) * 100) + '%'}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:13.5px;color:var(--muted)"><span>${s.paidCount} / ${s.count} toʻlangan</span><span class="mono" style="word-spacing:-.25em">${flat ? T('Jami narx ' + fmt(l.total)) : Math.round(s.paidCount / (s.count || 1) * 100) + '%'}</span></div>
     ${s.closed ? html`<div class="cfoot"><span class="lbl">Kredit yopilgan</span>${stamp('p', 'Yopildi', 'margin:0')}</div>`
       : html`<div class="cfoot"><span><span class="lbl" style="font-size:14.5px">Keyingi:</span> <b style="font-weight:600">${dMid(s.next.due)}</b>${rd.k <= 7 ? html` ${stamp(rd.late ? 'd' : 's', rd.late ? rd.text : rd.k === 0 ? 'bugun' : rd.k + ' kun', 'margin:0 0 0 4px;font-size:10.5px')}` : ''}</span><span class="mono" style="font-size:16px;font-weight:700">${fmt(late ? sum(s.overdue, 'total') : s.next.total)}</span></div>`}
   </div></a>`;
@@ -2152,12 +2279,12 @@ function viewKredit(id) {
   const cols = flat
     ? raw('<colgroup><col style="width:9%"><col style="width:27%"><col style="width:34%"><col style="width:30%"></colgroup>')
     : raw('<colgroup><col style="width:7%"><col style="width:19%"><col style="width:19%"><col style="width:17%"><col style="width:20%"><col style="width:18%"></colgroup>');
-  const head = flat ? html`<tr><th>№</th><th>Sana</th><th class="r">Toʻlov</th><th class="r">Holat</th></tr>` : html`<tr><th>№</th><th>Sana</th><th class="r">Asosiy</th><th class="r">Foiz</th><th class="r">Jami</th><th class="r">Holat</th></tr>`;
+  const head = flat ? html`<tr><th>№</th><th>Sana</th><th class="r">Toʻlov</th><th class="r">Holat</th></tr>` : html`<tr><th>№</th><th>Sana</th><th class="r">${L3('Asosiy', 'Осн. долг')}</th><th class="r">Foiz</th><th class="r">Jami</th><th class="r">Holat</th></tr>`;
   const dlRows = flat
     ? [['Tovar narxi', l.principal ? fmt(l.principal) : '—'], ['Ustama bilan jami', fmt(l.total)], ['Muddat', l.term + ' oy'], ['Olingan', dShort(l.issued, true)], ['Oylik toʻlov', fmt(s.payment || 0), true]]
     : [['Asosiy summa', fmt(l.principal)], ['Foiz', l.rate + '% yillik'], ['Muddat', l.term + ' oy'], ['Boshlangan', dShort(l.issued, true)], ['Oylik toʻlov', fmt(s.payment || 0), true]];
   return html`${mastDetail(l.name, 'kreditlar', 'loanMenu')}
-  <div class="dateline"><span>${l.lender ? l.lender + ', ' : ''}${TYPE_NAME[l.type]}</span><button class="schbtn" data-act="schemeInfo" data-id="${l.id}" aria-label="${SCHEME_NAME[l.scheme]} nima degani">${SCHEME_NAME[l.scheme]}${ic('help', 16, 1.6)}</button></div>
+  <div class="dateline"><span>${l.lender ? l.lender + ', ' : ''}${T(TYPE_NAME[l.type])}</span><button class="schbtn" data-act="schemeInfo" data-id="${l.id}" aria-label="${T(SCHEME_NAME[l.scheme])}?">${T(SCHEME_NAME[l.scheme])}${ic('help', 16, 1.6)}</button></div>
   <div class="wrap">
     <section style="margin-top:24px">
       <div class="lbl">${flat ? 'Qolgan qarz' : 'Qolgan asosiy qarz'}</div>
@@ -2186,7 +2313,7 @@ function viewCard(l) {
   const cs = calc.cardSummary(l, S.loans.payments), W = contentW();
   const pays = cs.pays.slice().reverse();
   return html`${mastDetail(l.name, 'kreditlar', 'loanMenu')}
-  <div class="dateline"><span>${l.lender ? l.lender + ', ' : ''}kredit karta</span><span>Toʻlov kuni: ${l.payDay}</span></div>
+  <div class="dateline"><span>${l.lender ? l.lender + ', ' : ''}${T('kredit karta')}</span><span>Toʻlov kuni: ${l.payDay}</span></div>
   <div class="wrap">
     <section style="margin-top:24px">
       <div class="lbl">Ishlatilgan</div>
@@ -2228,11 +2355,16 @@ function viewSozlamalar() {
       </button>
     </section>
     <section class="sec">
+      <div class="dl" style="border-top:1px solid var(--ink);margin-top:2px"><button data-act="langSheet" style="width:100%"><span style="color:var(--ink)">${ic('globe', 18, 1.6)}</span><span style="color:var(--ink);margin-left:6px">Til</span><span class="lead"></span><span translate="no">${(LANGS.find(x => x[0] === LANG) || LANGS[0])[1]}</span></button></div>
+    </section>
+    <section class="sec">
       <div class="sechead"><h2>Premium</h2>${isPremium() ? stamp('s', 'faol', 'margin:0') : html`<span class="lbl">tekin tarif</span>`}</div>
       <div class="dl" style="border-top:1px solid var(--ink);margin-top:10px">
         ${PREMIUM_FEATURES.map(([k], i) => html`<button data-act="premium" style="width:100%"><span style="color:var(--ink)">${k}</span><span class="lead"></span><span class="${isPremium() ? 'inc' : ''}">${isPremium() ? 'yoqilgan' : i === 1 ? 'tekin: 2 oy' : 'Premium'}</span></button>`)}
       </div>
+      <button class="tog ${s.botReminders ? 'on' : ''}" data-act="remToggle" style="margin-top:6px"><span style="text-align:left">Bot eslatmalari${isPremium() ? '' : html`<span class="prochip">Premium</span>`}<span class="lbl" style="display:block;font-size:13.5px">Toʻlov va qarz muddatini ertalab Telegram’da eslatadi</span></span><span class="sw"></span></button>
       ${isPremium() ? '' : html`<button class="btn pri" data-act="premium" style="margin-top:14px">${ic('spark', 19, 1.7)}Premium haqida</button>`}
+      <button class="linkrow" data-act="gift" style="margin-top:8px"><span style="color:var(--sig)">${ic('gift', 20, 1.5)}</span><span style="flex:1;text-align:left">Doʻstga Premium sovgʻa qilish</span>${ic('chevR', 18)}</button>
     </section>
     <section class="sec">
       <div class="sechead"><h2>Hisoblar</h2><span class="lbl">${s.accounts.filter(a => !a.archived).length} ta</span></div>
@@ -2297,7 +2429,7 @@ function viewIntro() {
   const feats = [['Kirim va chiqim', '3 bosishda'], ['Qarzlar', 'kim, qancha, qachon'], ['Kreditlar', 'jadval oʻzi tuziladi'], ['Byudjet', 'bugungi limit'], ['AI yordamchi', 'Premium']];
   return html`<div class="intro">
     <div class="print">
-      <div style="--i:0;display:flex;align-items:center;gap:12px"><span class="logo">${raw(LOGO_SVG)}</span><div class="kicker">№ 001 · shaxsiy moliya daftari</div></div>
+      <div style="--i:0;display:flex;align-items:center;gap:12px"><span class="logo">${raw(LOGO_SVG)}</span><div class="kicker" style="flex:1;min-width:0">№ 001 · shaxsiy moliya daftari</div>${langSwitch()}</div>
       <div class="word" style="--i:1">Xarajat<i>pulingiz qayerga ketyapti?</i></div>
       <p class="lede" style="--i:2">Telegram ichidagi daftar: har bir soʻmni yozasiz, qarz va kreditlarni kuzatasiz — oy oxirida “pul qayerga ketdi?” degan savol qolmaydi.</p>
     </div>
@@ -2405,8 +2537,8 @@ function openLayer({ render, ctx = {}, center = false, onInput, onKey, onClose, 
   const L = {
     el, ctx, render, onInput, onKey, onClose, onSave, closed: false,
     sheet: el.querySelector('.sheet'),
-    rerender() { const st = this.sheet.scrollTop; this.sheet.innerHTML = render(ctx, L).s; this.sheet.scrollTop = st; fitAll(this.sheet); },
-    part(sel, content) { const n = this.sheet.querySelector(sel); if (n) { n.innerHTML = sv(content); fitAll(n.parentElement || n); } },
+    rerender() { const st = this.sheet.scrollTop; this.sheet.innerHTML = render(ctx, L).s; i18nTree(this.sheet); this.sheet.scrollTop = st; fitAll(this.sheet); },
+    part(sel, content) { const n = this.sheet.querySelector(sel); if (n) { n.innerHTML = sv(content); i18nTree(n); fitAll(n.parentElement || n); } },
     close() {
       if (this.closed) return; this.closed = true;
       el.remove(); const i = layers.indexOf(L); if (i >= 0) layers.splice(i, 1);
@@ -2433,6 +2565,7 @@ function toast(msg, undo) {
   const el = document.createElement('div');
   el.className = 'toast'; el.setAttribute('role', 'status');
   el.innerHTML = html`<span>${msg}</span>${undo ? html`<button type="button">Bekor qilish</button>` : ''}`.s;
+  i18nTree(el);
   document.body.appendChild(el);
   if (undo) el.querySelector('button').addEventListener('click', () => { el.remove(); undo(); });
   clearTimeout(toastTimer);
@@ -2440,7 +2573,7 @@ function toast(msg, undo) {
 }
 function confirmDlg({ title, text, ok = 'Ha', danger = false, typed = null }) {
   if (!typed && tgv('6.2') && WA.showConfirm) {
-    return new Promise(resolve => { try { if (danger) hap('warning'); WA.showConfirm(`${title}\n\n${text}`.slice(0, 250), v => resolve(!!v)); } catch (e) { resolve(false); } });
+    return new Promise(resolve => { try { if (danger) hap('warning'); WA.showConfirm(`${T(title)}\n\n${T(text)}`.slice(0, 250), v => resolve(!!v)); } catch (e) { resolve(false); } });
   }
   return new Promise(resolve => {
     let done = false;
@@ -2449,7 +2582,7 @@ function confirmDlg({ title, text, ok = 'Ha', danger = false, typed = null }) {
       center: true, label: title, ctx: { v: '', typed, fin },
       render: c => html`<h3 class="serif" style="font-size:23px;line-height:1.15">${title}</h3>
         <p style="margin-top:10px;font-size:14.5px;color:var(--ink2);line-height:1.5">${text}</p>
-        ${typed ? html`<label class="f" style="margin-top:14px"><span class="k">Tasdiqlash uchun <b>${typed}</b> deb yozing</span><input type="text" data-k="v" autocomplete="off" autocapitalize="characters"></label>` : ''}
+        ${typed ? html`<label class="f" style="margin-top:14px"><span class="k">Tasdiqlash uchun <b translate="no">${typed}</b> deb yozing</span><input type="text" data-k="v" autocomplete="off" autocapitalize="characters"></label>` : ''}
         <div class="btn2" style="margin-top:20px"><button class="btn ghost sm" data-act="dlgNo">Bekor</button><button class="btn sm ${danger ? 'dngfill' : 'pri'}" data-act="dlgYes" id="dlgYes" ${typed ? raw('aria-disabled="true"') : ''}>${ok}</button></div>`,
       onInput: (k, el, L) => { const b = L.sheet.querySelector('#dlgYes'); b.setAttribute('aria-disabled', String(!typedOk(L.ctx.v, typed))); },
       onClose: () => fin(false),
@@ -2495,9 +2628,10 @@ function openAdd(opts = {}) {
   const cats = pickCats(type);
   const last = (UIP.lastCat || {})[type];
   const accId = defaultAcc(), acc = accById(accId);
+  const pf = opts.prefill || {};
   const AF = {
-    mode: 'add', type, digits: '', cur: acc.currency || 'UZS', catId: cats.some(c => c.id === last) ? last : (cats[0] || {}).id,
-    accId, toAccId: (activeAccs().find(a => a.id !== accId) || {}).id || null, date: opts.date || today(), note: '', rec: 'none',
+    mode: 'add', type, digits: pf.digits || '', cur: pf.cur || acc.currency || 'UZS', catId: pf.catId || (cats.some(c => c.id === last) ? last : (cats[0] || {}).id),
+    accId: pf.accId || accId, toAccId: (activeAccs().find(a => a.id !== (pf.accId || accId)) || {}).id || null, date: pf.date || opts.date || today(), note: pf.note || '', rec: 'none',
     rate: S.settings.usdRate ? grp(S.settings.usdRate) : '',
   };
   return openTxSheet(AF);
@@ -2541,7 +2675,7 @@ function afHint(AF) {
     const st = calc.monthStats(allTx().filter(t => t.id !== AF.id), ym);
     if (c && c.limit) {
       const left = c.limit - (st.byCat[c.id] || 0) - uz;
-      return left >= 0 ? html`${c.name} limitidan <span class="mono" style="color:var(--ink)">${fmt(left)}</span> soʻm qoladi` : html`<span class="dng">${c.name} limiti <span class="mono">${fmt(-left)}</span> soʻmga oshadi</span>`;
+      return left >= 0 ? html`${catName(c.id)} limitidan <span class="mono" style="color:var(--ink)">${fmt(left)}</span> soʻm qoladi` : html`<span class="dng">${catName(c.id)} limiti <span class="mono">${fmt(-left)}</span> soʻmga oshadi</span>`;
     }
     if (S.settings.budget && ym === ymOf(today())) {
       const dl = calc.dailyLimit(S.settings.budget, st.expense, today());
@@ -2595,7 +2729,7 @@ function renderTxSheet(AF) {
     <div class="amtrow"><div class="amt-big disp ${AF.digits ? '' : 'empty'} ${AF.type === 'exp' ? 'exp' : AF.type === 'inc' ? 'inc' : ''}" id="afAmt" data-fit aria-live="polite">${afAmountHTML(AF)}</div></div>
     <div class="hint" id="afHint">${afHint(AF)}</div>
     ${isTr ? html`<div class="lbl" style="font-size:13.5px;margin-top:10px">Qayerdan</div>${accChips('afFrom', AF.accId)}<div class="lbl" style="font-size:13.5px;margin-top:10px">Qayerga</div>${accChips('afTo', AF.toAccId, AF.accId)}`
-      : html`<div class="cats">${cats.map(c => html`<button class="${AF.catId === c.id ? 'on' : ''}" data-act="afCat" data-id="${c.id}">${ic(c.icon, 22, 1.5)}<span>${raw(esc(c.name).replace(/\//g, '/<wbr>'))}</span></button>`)}</div>`}
+      : html`<div class="cats">${cats.map(c => html`<button class="${AF.catId === c.id ? 'on' : ''}" data-act="afCat" data-id="${c.id}">${ic(c.icon, 22, 1.5)}<span>${raw(esc(catName(c.id)).replace(/\//g, '/<wbr>'))}</span></button>`)}</div>`}
     <div class="fields ${isTr ? 'three' : 'four'}">
       ${isTr ? '' : html`<button class="fld" data-act="afAcc"><span class="k">Hisob</span><span class="v"><span>${acc ? acc.name : '—'}</span>${ic('chevD', 14, 1.8)}</span></button>`}
       <label class="fld"><span class="k">Sana</span><span class="v"><span>${AF.date === today() ? 'Bugun' : AF.date === addDays(today(), -1) ? 'Kecha' : dShort(AF.date)}</span>${ic('chevD', 14, 1.8)}</span><input class="over" type="date" data-k="date" value="${AF.date}" max="${addDays(today(), 366)}" aria-label="Sana"></label>
@@ -2655,7 +2789,7 @@ function openDebtForm(opts = {}) {
           <label class="f"><span class="k">Sana</span><input type="date" data-k="date" value="${c.date}"></label>
           <label class="f"><span class="k">Qaytarish muddati</span><input type="date" data-k="due" value="${c.due}" min="${c.date}"></label>
         </div>
-        <button class="tog ${c.affects ? 'on' : ''}" data-act="dfAffects"><span style="text-align:left">Balansga taʼsir qilsin<span class="lbl" style="display:block;font-size:13.5px">${c.dir === 'given' ? 'Pul hisobdan chiqadi' : 'Pul hisobga tushadi'}, statistika oʻzgarmaydi</span></span><span class="sw"></span></button>
+        <button class="tog ${c.affects ? 'on' : ''}" data-act="dfAffects"><span style="text-align:left">Balansga taʼsir qilsin<span class="lbl" style="display:block;font-size:13.5px">${T(c.dir === 'given' ? 'Pul hisobdan chiqadi' : 'Pul hisobga tushadi')}, statistika oʻzgarmaydi</span></span><span class="sw"></span></button>
         ${c.affects ? html`<div class="f"><span class="k">Hisob</span>${accChipRow('dfAcc', c.accId)}</div>` : ''}
         <label class="f"><span class="k">Telefon (ixtiyoriy)</span><input type="tel" data-k="phone" value="${c.phone}" placeholder="+998 …" maxlength="20"></label>
         <label class="f"><span class="k">Izoh</span><textarea data-k="note" rows="2" maxlength="300" placeholder="nima uchun, kelishuv…">${c.note}</textarea></label>
@@ -2767,7 +2901,7 @@ function openLoanForm(opts = {}) {
     label: l ? 'Kreditni tahrirlash' : 'Kredit qoʻshish', ctx,
     render: c => html`${sheetHead(c.edit ? 'Kreditni tahrirlash' : 'Kredit qoʻshish', opts.prefill ? 'AI toʻldirdi — tekshirib, saqlang' : c.edit ? c.name : '')}
       <div class="form">
-        ${c.edit ? html`<div class="lbl" style="font-size:14.5px">Turi: <b style="color:var(--ink);font-weight:600">${TYPE_NAME[c.type]}</b> · turini oʻzgartirib boʻlmaydi</div>`
+        ${c.edit ? html`<div class="lbl" style="font-size:14.5px">Turi: <b style="color:var(--ink);font-weight:600">${T(TYPE_NAME[c.type])}</b> · turini oʻzgartirib boʻlmaydi</div>`
           : html`<div class="seg"><button class="${c.type === 'bank' ? 'on' : ''}" data-act="lfType" data-t="bank">Bank krediti</button><button class="${c.type === 'installment' ? 'on' : ''}" data-act="lfType" data-t="installment">Nasiya</button><button class="${c.type === 'card' ? 'on' : ''}" data-act="lfType" data-t="card">Kredit karta</button></div>`}
         ${early ? html`<div class="box warn" style="font-size:14.5px">Bu kreditda muddatidan oldin toʻlov bor. Summa, foiz va muddatni oʻzgartirish uchun avval jadvaldan oʻsha toʻlovni bekor qiling. Nom va bankni oʻzgartirish mumkin.</div>` : ''}
         <div class="frow">
@@ -2896,16 +3030,17 @@ const AI_SCHEMA = {
   properties: {
     kind: { type: 'string', enum: ['loan', 'debt', 'unknown'] },
     loanType: nullable({ type: 'string', enum: ['bank', 'installment', 'card'] }),
-    name: nullable({ type: 'string' }), lender: nullable({ type: 'string' }), person: nullable({ type: 'string' }),
+    // free text is a plain string ("" when unknown) — the API allows at most 16 union-typed fields; aiClean turns "" into null
+    name: { type: 'string' }, lender: { type: 'string' }, person: { type: 'string' },
     dir: nullable({ type: 'string', enum: ['given', 'taken'] }),
     amount: nullable({ type: 'integer' }), total: nullable({ type: 'integer' }),
     markupPct: nullable({ type: 'number' }), ratePct: nullable({ type: 'number' }),
     termMonths: nullable({ type: 'integer' }), scheme: nullable({ type: 'string', enum: ['annuity', 'diff'] }),
     paidMonths: nullable({ type: 'integer' }), payDay: nullable({ type: 'integer' }),
-    issued: nullable({ type: 'string', format: 'date' }),
+    issued: { type: 'string' },
     limit: nullable({ type: 'integer' }), used: nullable({ type: 'integer' }),
     currency: nullable({ type: 'string', enum: ['UZS', 'USD'] }),
-    due: nullable({ type: 'string', format: 'date' }), note: nullable({ type: 'string' }),
+    due: { type: 'string' }, note: { type: 'string' },
   },
 };
 const aiSystem = () => `You read one short note, usually in Uzbek (Latin or Cyrillic, sometimes Russian), from the user of a personal finance notebook app, and extract a single loan or personal debt as JSON. Today is ${today()}. People type fast on a phone: expect typos, missing apostrophes (tolov = toʻlov) and merged words (3oy = 3 oy), and read them generously.
@@ -3188,7 +3323,7 @@ function aiSummary(a) {
   const sm = v => v == null ? null : money(v, a.currency === 'USD' ? 'USD' : 'UZS') + (a.currency === 'USD' ? '' : ' soʻm');
   if (a.kind === 'loan') {
     const t = a.loanType;
-    return html`${L('Turi', TYPE_NAME[t])}${L(t === 'installment' ? 'Doʻkon' : 'Bank', a.lender)}${t !== 'card' ? L('Nomi', a.name || aiName(a) + ' (taxmin)') : ''}
+    return html`${L('Turi', T(TYPE_NAME[t]))}${L(t === 'installment' ? 'Doʻkon' : 'Bank', a.lender)}${t !== 'card' ? L('Nomi', a.name || aiName(a) + ' (taxmin)') : ''}
       ${t === 'card' ? html`${L('Limit', sm(a.limit))}${L('Ishlatilgan', sm(a.used))}${L('Yillik foiz', a.ratePct != null ? a.ratePct + '%' : null)}`
         : t === 'installment' ? html`${L('Tovar narxi', sm(a.amount))}${a.total ? L('Jami narx', sm(a.total)) : L('Ustama', a.markupPct != null ? a.markupPct + '%' : null)}${L('Muddat', a.termMonths ? a.termMonths + ' oy' : null)}`
         : html`${L('Summa', sm(a.amount))}${a.total ? L('Jami toʻlov', sm(a.total)) : ''}${L('Yillik foiz', a.ratePct != null ? String(a.ratePct).replace('.', ',') + '%' : null)}${L('Muddat', a.termMonths ? a.termMonths + ' oy' : null)}${L('Sxema', a.scheme ? SCHEME_NAME[a.scheme] : 'Annuitet (taxmin)')}`}
@@ -3223,14 +3358,25 @@ function openAiSheet(hint) {
 const PREMIUM_OWNERS = ['azizbektursunovv'];
 const tgUser = () => { try { return (WA && WA.initDataUnsafe && WA.initDataUnsafe.user) || null; } catch (e) { return null; } };
 const tgUsername = () => { const u = tgUser(); return u && u.username ? String(u.username) : ''; };
-const isPremium = () => PREMIUM_OWNERS.includes(tgUsername().toLowerCase());
+const isOwner = () => PREMIUM_OWNERS.includes(tgUsername().toLowerCase()) || !!(typeof ME !== 'undefined' && ME && ME.premium && ME.premium.owner);
+// server answer first; the cached end date keeps Premium working offline until it expires
+const isPremium = () => isOwner() || !!(ME && ME.premium && ME.premium.active) || !!(UIP.prem && UIP.prem >= today());
 const FREE_MONTHS_BACK = 1; // free plan: the current month and the one before it
 const monthOpen = ym => isPremium() || ym >= ymAdd(ymOf(today()), -FREE_MONTHS_BACK);
 const PREMIUM_FEATURES = [
   ['AI yordamchi', 'kredit va qarzni oddiy matndan toʻldiradi'],
   ['Toʻliq tarix', 'barcha oylar: asosiy sahifa, tarix, kalendar va qidiruv'],
+  ['Bot eslatmalari', 'toʻlov va qarz muddatini Telegram’da eslatadi'],
+  ['SMS’dan yozish', 'bank xabarini botga yuborsangiz, yozuv tayyor'],
 ];
 const LOGO_SVG = '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#2436C9"/><g transform="rotate(-6 256 256) translate(256 256) scale(1.06) translate(-256 -256)"><polygon points="160,108 173.71,92 187.43,108 201.14,92 214.86,108 228.57,92 242.29,108 256,92 269.71,108 283.43,92 297.14,108 310.86,92 324.57,108 338.29,92 352,108 352,404 338.29,420 324.57,404 310.86,420 297.14,404 283.43,420 269.71,404 256,420 242.29,404 228.57,420 214.86,404 201.14,420 187.43,404 173.71,420 160,404" fill="#FBF8F1"/><rect x="188" y="162" width="56" height="20" fill="#2436C9"/><rect x="206" y="144" width="20" height="56" fill="#2436C9"/><rect x="262" y="162" width="62" height="20" fill="#1C1A16"/><rect x="188" y="230" width="56" height="20" fill="#B8301C"/><rect x="262" y="230" width="62" height="20" fill="#1C1A16"/><rect x="188" y="282" width="136" height="10" fill="#1C1A16"/><rect x="188" y="300" width="136" height="4" fill="#1C1A16"/><rect x="236" y="330" width="88" height="30" fill="#1C1A16"/></g></svg>';
+/** compact language switch (intro page) */
+const langSwitch = () => html`<div class="langsw" translate="no">${LANGS.map(([id]) => html`<button class="${LANG === id ? 'on' : ''}" data-act="lang" data-l="${id}" aria-label="${id}">${id === 'uz' ? 'Oʻz' : id === 'ru' ? 'Ру' : 'Ўз'}</button>`)}</div>`;
+function openLangSheet() {
+  openLayer({
+    label: 'Til', render: () => html`${sheetHead('Til')}<div class="list" style="margin-top:10px;border-top:1px solid var(--ink)" translate="no">${LANGS.map(([id, name, sub]) => html`<button data-act="lang" data-l="${id}"><div class="grow"><div class="t">${name}</div><div class="s">${sub}</div></div>${LANG === id ? html`<span class="inc">${ic('check', 20, 2)}</span>` : ''}</button>`)}</div>`,
+  });
+}
 const initialOf = n => { const c = Array.from(String(n || '').trim())[0]; return c ? c.toUpperCase() : ''; };
 /** round initial in the home masthead: opens profile + settings */
 function avatarBtn() {
@@ -3247,10 +3393,13 @@ function lockCard(ym) {
   ${edge('bot')}</div>`;
 }
 function openPremium(reason) {
-  const pro = isPremium();
   openLayer({
-    label: 'Premium',
-    render: () => html`${sheetHead(html`<span class="aitag">${ic('spark', 15, 1.6)}Xarajat Premium</span>`, reason === 'ai' ? 'AI yordamchi — Premium imkoniyati' : reason === 'month' ? 'Oldingi oylar Premium’da ochiladi' : 'Koʻproq imkoniyat, reklamasiz')}
+    label: 'Premium', ctx: { plan: 'y1' },
+    render: c => {
+      const pro = isPremium(), owner = isOwner(), until = ME && ME.premium && ME.premium.until;
+      const p = PLANS.find(x => x.id === c.plan);
+      const sub = reason === 'ai' ? 'AI yordamchi — Premium imkoniyati' : reason === 'month' ? 'Oldingi oylar Premium’da ochiladi' : reason === 'rem' ? 'Bot eslatmalari — Premium imkoniyati' : 'Koʻproq imkoniyat, reklamasiz';
+      return html`${sheetHead(html`<span class="aitag">${ic('spark', 15, 1.6)}Xarajat Premium</span>`, sub)}
       <div class="receipt" style="margin:22px 2px 0">${edge('top')}
         <div class="rc-head"><div class="serif">Premium’da</div></div>
         <div class="dash" style="margin-top:12px"></div>
@@ -3258,10 +3407,210 @@ function openPremium(reason) {
         <div style="border-top:1px solid var(--ink);margin-top:6px"></div>
         <p class="lbl" style="font-size:14px;margin-top:10px;line-height:1.45"><b style="color:var(--ink)">Tekin tarifda:</b> kirim-chiqim, qarzlar, kreditlar, byudjet, joriy va oʻtgan oy.</p>
       ${edge('bot')}</div>
-      ${pro ? html`<div class="box info" style="margin-top:18px;font-size:14.5px;display:flex;align-items:center;gap:10px">${stamp('s', 'faol', 'margin:0')}<span>Sizda Premium yoqilgan.</span></div>`
-        : html`<button class="btn pri" style="margin-top:18px" aria-disabled="true">Tez orada</button>
-          <p class="lbl" style="font-size:14px;margin-top:10px;text-align:center">Premium sotuvi tez orada Telegram Stars orqali ochiladi.</p>`}`,
+      ${owner ? html`<div class="box info" style="margin-top:18px;font-size:14.5px;display:flex;align-items:center;gap:10px">${stamp('s', 'faol', 'margin:0')}<span>Sizda Premium doimiy yoqilgan.</span></div>`
+        : html`${pro ? html`<div class="box info" style="margin-top:18px;font-size:14.5px;display:flex;align-items:center;gap:10px">${stamp('s', 'faol', 'margin:0')}<span>Premium ${until ? dMid(until) + 'gacha' : ''} faol. Muddatni uzaytirish mumkin.</span></div>` : ''}
+        <div class="plans">${PLANS.map(x => html`<button class="plan ${c.plan === x.id ? 'on' : ''}" data-act="premPlan" data-p="${x.id}">
+          ${x.id === 'y1' ? html`<span class="stamp s pbest">eng foydali</span>` : ''}
+          <span class="pm">${planMonthsTxt(x)}</span><span class="ps"><b class="mono">${x.stars}</b> ⭐</span>
+          <span class="pp">${x.months > 1 ? `≈${perMonth(x)} ⭐ / oy` : 'bir oylik'}</span>
+          ${x.months > 1 ? html`<span class="pdisc">−${Math.round((1 - x.stars / (PLANS[0].stars * x.months)) * 100)}%</span>` : ''}</button>`)}</div>
+        <button class="btn pri" data-act="premBuy" style="margin-top:16px" ${serverReady() ? '' : raw('aria-disabled="true"')}>${ic('star', 19, 1.7)}${serverReady() ? `${p.stars} ⭐ — ${pro ? 'muddatni uzaytirish' : 'Premium olish'}` : 'Tez orada'}</button>
+        <p class="lbl" style="font-size:13.5px;margin-top:10px;text-align:center">${serverReady() ? 'Telegram Stars bilan bir martalik toʻlov. Avtomatik yechilmaydi.' : 'Premium sotuvi tez orada Telegram Stars orqali ochiladi.'}</p>`}
+      <button class="linkrow" data-act="gift" style="margin-top:12px;border-top:1px dashed var(--rule)"><span style="color:var(--sig)">${ic('gift', 20, 1.5)}</span><span style="flex:1;text-align:left">Doʻstga Premium sovgʻa qilish</span>${ic('chevR', 18)}</button>`;
+    },
   });
+}
+
+/* =====================================================================
+   15d. SERVER — Premium purchases (Telegram Stars), gifts, shared debts,
+   bot reminders and drafts from the bot. Talks to the Cloudflare Worker in server/.
+   API_BASE stays empty until the Worker is deployed; then these features switch on.
+   ===================================================================== */
+// the deployed Worker (server/ in the xarajat-server repo); tests set window.__XARAJAT_API ('' = off, or a fake server)
+const API_BASE = typeof window !== 'undefined' && typeof window.__XARAJAT_API === 'string' ? window.__XARAJAT_API : 'https://xarajat-api.azizbektursunov-me.workers.dev';
+const PLANS = [{ id: 'm1', months: 1, stars: 100 }, { id: 'm6', months: 6, stars: 350 }, { id: 'y1', months: 12, stars: 500 }];
+const apiOn = () => !!API_BASE && IN_TG && !!WA.initData;
+// the server answered /api/me in this session — only then are the buy / share / reminder buttons live
+const serverReady = () => apiOn() && !!ME;
+let ME = null; // last /api/me answer
+async function api(path, body) {
+  const r = await fetch(API_BASE + path, {
+    method: body ? 'POST' : 'GET',
+    headers: Object.assign({ 'x-init-data': WA.initData }, body ? { 'content-type': 'application/json' } : {}),
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  let j = null; try { j = await r.json(); } catch (e) { }
+  if (!r.ok || !j || !j.ok) throw Object.assign(new Error((j && j.message) || 'Server javob bermadi'), { code: j && j.error, status: r.status });
+  return j;
+}
+/** refresh premium / gifts from the server; keeps a cached copy for offline starts */
+async function meRefresh() {
+  if (!apiOn()) return null;
+  try {
+    ME = await api('/api/me?lang=' + encodeURIComponent(LANG));
+    UIP.prem = ME.premium && ME.premium.active ? (ME.premium.until || '9999-12-31') : ''; saveUIP();
+    scheduleRender();
+  } catch (e) { /* offline: keep the cached state */ }
+  return ME;
+}
+const planMonthsTxt = p => (p.months === 12 ? '1 yil' : `${p.months} oy`);
+const perMonth = p => Math.round(p.stars / p.months);
+
+/* ---------- buying ---------- */
+function buyPlan(planId, gift, note) {
+  if (!serverReady()) { toast('Premium sotuvi tez orada ochiladi'); return Promise.resolve(false); }
+  if (!(WA.openInvoice && tgv('6.1'))) { warn('Telegram ilovasini yangilang — toʻlov oynasi ochilmadi'); return Promise.resolve(false); }
+  return api('/api/invoice', { plan: planId, gift: !!gift, note: note || '' }).then(res => new Promise(resolve => {
+    WA.openInvoice(res.link, status => {
+      if (status === 'paid') { hap('success'); meRefresh().then(() => resolve(true)); }
+      else { if (status === 'failed') warn('Toʻlov amalga oshmadi'); resolve(false); }
+    });
+  })).catch(e => { warn(e.message || 'Xatolik'); return false; });
+}
+
+/* ---------- gifts: a “gift receipt” the friend opens in the bot ---------- */
+function giftShare(g) {
+  const link = g.link || '';
+  const text = `🎁 Sizga Xarajat Premium sovgʻa — ${planMonthsTxt({ months: g.months })}!${g.note ? ' “' + g.note + '”' : ''} Olish uchun havolani oching:`;
+  const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(T(text));
+  try { WA.openTelegramLink(url); } catch (e) { copyText(link); }
+}
+function openGift() {
+  const from = (S.settings && S.settings.name) || '';
+  openLayer({
+    label: 'Sovgʻa', ctx: { plan: 'm6', note: '', busy: false, done: null },
+    render: c => {
+      const p = PLANS.find(x => x.id === c.plan);
+      if (c.done) return html`${sheetHead(html`<span class="aitag">${ic('gift', 15, 1.6)}Sovgʻa tayyor</span>`, '')}
+        <div class="giftcard" style="margin-top:18px">${giftCard(c.done.months, c.done.note, from, true)}</div>
+        <p class="lbl" style="text-align:center;margin-top:14px">Havolani doʻstingizga yuboring — u botni ochib, sovgʻani oladi.</p>
+        <button class="btn pri" data-act="giftSend" style="margin-top:14px">${ic('share', 19, 1.7)}Doʻstga yuborish</button>`;
+      return html`${sheetHead(html`<span class="aitag">${ic('gift', 15, 1.6)}Premium sovgʻa qilish</span>`, 'Doʻstingizga tartibli hisob sovgʻa qiling')}
+        <div class="giftcard" style="margin-top:18px">${giftCard(p.months, c.note, from, false)}</div>
+        <div class="f" style="margin-top:18px"><span class="k">Muddat</span><div class="seg">${PLANS.map(x => html`<button class="${c.plan === x.id ? 'on' : ''}" data-act="giftPlan" data-p="${x.id}">${planMonthsTxt(x)}</button>`)}</div></div>
+        <label class="f" style="margin-top:14px"><span class="k">Tilak (ixtiyoriy)</span><textarea data-k="note" rows="2" maxlength="140" placeholder="Masalan: Tugʻilgan kuning bilan! Endi pulingiz qayerga ketishini bilasiz 🙂">${c.note}</textarea></label>
+        <button class="btn pri" data-act="giftBuy" style="margin-top:16px" ${c.busy || !serverReady() ? raw('aria-disabled="true"') : ''}>${ic('star', 19, 1.7)}${serverReady() ? `${p.stars} ⭐ — sovgʻani olish` : 'Tez orada'}</button>
+        ${(ME && ME.gifts && ME.gifts.length) ? html`<div class="sechead" style="margin-top:26px"><h2 style="font-size:22px">Yuborilganlar</h2><span class="lbl">${ME.gifts.length} ta</span></div>
+          <div class="list" style="margin-top:6px;border-top:1px solid var(--ink)">${ME.gifts.slice(0, 10).map(g => html`<button data-act="giftResend" data-code="${g.code}"><span style="color:var(--sig)">${ic('gift', 20, 1.5)}</span><div class="grow"><div class="t">${planMonthsTxt({ months: g.months })} Premium</div><div class="s">${g.redeemed ? `oldi: ${g.to_name || 'doʻstingiz'}` : 'hali olinmagan — qayta yuborish'}</div></div>${g.redeemed ? stamp('p', 'olindi', 'margin:0;font-size:10px') : ic('share', 18, 1.6)}</button>`)}</div>` : ''}`;
+    },
+    onInput: (k, el, L) => { if (k === 'note') { const n = L.sheet.querySelector('#gcNote'); if (n) n.textContent = el.value.trim() ? '“' + el.value.trim() + '”' : T('Tilagingiz shu yerda chiqadi'); } },
+  });
+}
+/** the gift receipt: torn paper, ribbon, stamp — the same card the friend sees described in the bot */
+function giftCard(months, note, from, ready) {
+  return html`<div class="receipt gift">${edge('top')}
+    <div class="ribbon" aria-hidden="true"></div><svg class="bow" viewBox="0 0 54 34" aria-hidden="true"><path d="M27 17C20 5 5 2 5 11s15 9 22 6zm0 0c7-12 22-15 22-6s-15 9-22 6z" style="fill:var(--sig)"/><path d="M27 17l-7 15M27 17l7 15" style="stroke:var(--sig)" stroke-width="5"/><circle cx="27" cy="17" r="5" style="fill:var(--sig)"/></svg>
+    <div class="rc-head"><div class="kicker" style="text-align:center">Sovgʻa cheki</div><div class="serif" style="font-size:30px;margin-top:6px">Xarajat Premium</div></div>
+    <div class="dash" style="margin-top:12px"></div>
+    <div class="feat"><span class="n">01</span><b>Muddat</b><span class="lead"></span><span class="v">${planMonthsTxt({ months })}</span></div>
+    <div class="feat"><span class="n">02</span><b>AI yordamchi</b><span class="lead"></span><span class="v">bor</span></div>
+    <div class="feat"><span class="n">03</span><b>Toʻliq tarix</b><span class="lead"></span><span class="v">bor</span></div>
+    <div class="gnote" id="gcNote">${note && note.trim() ? '“' + note.trim() + '”' : 'Tilagingiz shu yerda chiqadi'}</div>
+    ${from ? html`<div class="gfrom">— ${from}</div>` : ''}
+    <span class="stamp ${ready ? 'p' : 's'} gstamp">${ready ? 'toʻlangan' : 'sovgʻa'}</span>
+  ${edge('bot')}</div>`;
+}
+
+/* ---------- shared debts: the other person confirms in the bot ---------- */
+let SHARES = null; // { mine: [], toMe: [] }
+async function sharesRefresh() {
+  if (!apiOn()) return;
+  try { SHARES = await api('/api/debt-shares'); UIP.sharesAt = Date.now(); saveUIP(); scheduleRender(); } catch (e) { }
+}
+const shareOf = d => (d && d.share && SHARES ? SHARES.mine.find(s => s.token === d.share) : null);
+const SHARE_TXT = { pending: 'javob kutilmoqda', accepted: 'tasdiqladi', rejected: 'rad etdi' };
+/** person page: send the debt to the other person for confirmation; shows their answer */
+function shareButton(sm) {
+  const d = sm.open.slice().sort((a, b) => (a.date < b.date ? 1 : -1))[0], sh = shareOf(d);
+  return html`<div class="sharebox">
+    <button class="btn ghost" data-act="debtShare">${ic('share', 19, 1.7)}${d.share ? 'Qayta yuborish' : 'Tasdiqlash uchun yuborish'}</button>
+    <p class="lbl" style="font-size:13.5px;margin-top:8px">${sh ? html`${sm.name}: ${stamp(sh.status === 'accepted' ? 'p' : sh.status === 'rejected' ? 'd' : 's', SHARE_TXT[sh.status] || sh.status, 'margin:0 0 0 4px;font-size:10.5px')}` : serverReady() ? 'Havolani ochgan odam qarzni botda tasdiqlaydi — ikkalangiz bir xil summani koʻrasiz.' : 'Tez orada: qarzni ikkinchi tomon botda tasdiqlaydi.'}</p>
+  </div>`;
+}
+/** Qarzlar page: debts other people sent me and I confirmed in the bot */
+function toMeSection() {
+  const list = SHARES ? SHARES.toMe.filter(s => s.status === 'accepted' && !(UIP.imported || {})[s.token]) : [];
+  if (!list.length) return '';
+  return html`<section class="sec"><div class="sechead"><h2>Sizga yuborilgan</h2><span class="lbl">${list.length} ta</span></div>
+    <div class="list" style="margin-top:8px;border-top:1px solid var(--ink)">${list.map(s => html`<div><div class="grow"><div class="t">${s.owner_name}</div><div class="s">${s.dir === 'given' ? 'siz qarzdorsiz' : 'sizga qarzdor'} · <span class="mono">${money(s.amount, s.currency)}</span>${s.currency === 'USD' ? '' : ' soʻm'}</div></div><button class="chip" data-act="shareImport" data-t="${s.token}">${ic('plus', 16, 2)}Daftarga</button></div>`)}</div></section>`;
+}
+async function shareDebt(pid) {
+  if (!serverReady()) { toast('Bu imkoniyat tez orada ochiladi'); return; }
+  const P = personById(pid); if (!P) return;
+  const sm = calc.debtSummary(S.debts, S.settings.usdRate).people[pid];
+  const d = sm && sm.open.slice().sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  if (!d) { warn('Ochiq qarz yoʻq'); return; }
+  try {
+    const res = d.share ? { link: `https://t.me/${(ME && ME.bot && ME.bot.username) || ''}?start=debt_${d.share}` } : await api('/api/debt-share', { dir: d.dir, amount: calc.debtRemaining(d, S.debts.payments), currency: d.currency, date: d.date, due: d.due || null, note: d.note || null, person: P.name });
+    if (res.token) { d.share = res.token; commit(['debts']); }
+    const amt = money(calc.debtRemaining(d, S.debts.payments), d.currency) + (d.currency === 'USD' ? '' : ' soʻm');
+    const text = d.dir === 'given' ? `Salom, ${P.name}! Xarajat daftarimga ${amt} qarzni yozib qoʻydim. Tasdiqlab qoʻying:` : `Salom, ${P.name}! Sizdan olgan ${amt} qarzimni yozib qoʻydim. Tasdiqlab qoʻying:`;
+    WA.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(res.link) + '&text=' + encodeURIComponent(T(text)));
+    setTimeout(sharesRefresh, 4000);
+  } catch (e) { warn(e.message || 'Xatolik'); }
+}
+
+/* ---------- bot reminders (Premium) ---------- */
+function reminderItems() {
+  const t = today(), until = addDays(t, 60), items = [];
+  for (const l of S.loans.loans) {
+    if (l.type === 'card') {
+      const cs = calc.cardSummary(l, S.loans.payments);
+      if (cs.due && cs.nextDue <= until) items.push({ id: `card-${l.id}-${cs.nextDue}`, date: cs.nextDue, text: `${l.name}: minimal toʻlov ${fmt(cs.minPay - cs.paidCycle)} soʻm` });
+      continue;
+    }
+    const s = calc.loanSummary(l, S.loans.payments);
+    for (const r of s.unpaid) if (r.due >= addDays(t, -3) && r.due <= until) items.push({ id: `loan-${r.id}`, date: r.due < t ? t : r.due, text: `${l.name}: ${fmt(r.total)} soʻm toʻlov` });
+  }
+  for (const d of S.debts.debts) {
+    const rem = calc.debtRemaining(d, S.debts.payments), p = personById(d.pid);
+    if (rem > 0 && d.due && d.due >= addDays(t, -3) && d.due <= until && p) items.push({ id: `debt-${d.id}`, date: d.due < t ? t : d.due, text: `${p.name}: ${money(rem, d.currency)}${d.currency === 'USD' ? '' : ' soʻm'} ${d.dir === 'given' ? 'qaytarishi kerak' : 'qaytarishim kerak'}` });
+  }
+  return items.sort((a, b) => (a.date < b.date ? -1 : 1)).slice(0, 100).map(x => Object.assign(x, { text: T(x.text).slice(0, 120) }));
+}
+let remTimer;
+function remindersSync(force) {
+  if (!serverReady() || !S.settings || !S.settings.botReminders) return;
+  if (!force && UIP.remAt === today()) return;
+  clearTimeout(remTimer);
+  remTimer = setTimeout(() => api('/api/reminders', { enabled: true, items: reminderItems() }).then(() => { UIP.remAt = today(); saveUIP(); }).catch(() => { }), force ? 4000 : 3000);
+}
+async function toggleReminders() {
+  if (!isPremium()) { openPremium('rem'); return; }
+  if (!serverReady()) { toast('Bot eslatmalari tez orada ochiladi'); return; }
+  const on = !S.settings.botReminders;
+  try {
+    await api('/api/reminders', on ? { enabled: true, items: reminderItems() } : { enabled: false, items: [] });
+    S.settings.botReminders = on; commit(['settings']); UIP.remAt = today(); saveUIP();
+    toast(on ? 'Bot har kuni ertalab muddatlarni eslatadi' : 'Bot eslatmalari oʻchirildi');
+  } catch (e) { warn(e.message || 'Xatolik'); }
+}
+
+/* ---------- drafts: bank SMS forwarded to the bot → a ready form here ---------- */
+async function draftOpen(id) {
+  if (!apiOn() || !id) return;
+  try {
+    const { draft } = await api('/api/draft?id=' + encodeURIComponent(id));
+    api('/api/draft/done', { id }).catch(() => { });
+    if (!S.settings || !S.settings.onboarded) return;
+    aiApplyResult(draft.kind, draft.data, 'Botdan kelgan yozuv — tekshirib, saqlang');
+  } catch (e) { warn(e.message || 'Yozuv topilmadi'); }
+}
+/** open the right form for an AI / bot result: tx → add sheet, loan → loan form, debt → debt form */
+function aiApplyResult(kind, data, sub) {
+  if (kind === 'tx') {
+    const accs = activeAccs(); if (!accs.length) { toast('Avval Sozlamalarda hisob qoʻshing'); return; }
+    const hint = String(data.accHint || '').toLowerCase();
+    const acc = accs.find(a => hint && (a.name.toLowerCase().includes(hint) || hint.includes(a.name.toLowerCase()))) || accById(defaultAcc());
+    const type = data.type === 'inc' ? 'inc' : 'exp';
+    const cats = pickCats(type);
+    openAdd({ type, prefill: { digits: data.amount ? String(Math.round(data.amount)) : '', cur: data.currency === 'USD' ? 'USD' : acc.currency, accId: acc.id, date: data.date && data.date <= today() ? data.date : today(), note: data.note || '', catId: cats.some(c => c.id === data.catHint) ? data.catHint : undefined } });
+    if (sub) toast(sub);
+    return;
+  }
+  const a = aiFinish(aiClean(Object.assign({}, data, { kind })));
+  if (a.kind === 'loan') openLoanForm({ prefill: aiLoanPrefill(a) });
+  else if (a.kind === 'debt') openDebtForm({ prefill: aiDebtPrefill(a) });
 }
 
 function openAccForm(id) {
@@ -3486,7 +3835,7 @@ const ACT = {
       render: c => html`${sheetHead('Filtr')}
         <div class="form">
           <div class="f"><span class="k">Turi</span><div class="chips">${[['all', 'Hammasi'], ['exp', 'Chiqim'], ['inc', 'Kirim'], ['tr', 'Oʻtkazma'], ['debt', 'Qarz']].map(([k, v]) => html`<button class="chip ${c.type === k ? 'on' : ''}" data-act="fType" data-v="${k}">${v}</button>`)}</div></div>
-          <div class="f"><span class="k">Kategoriya</span><div class="chips"><button class="chip ${!c.cat ? 'on' : ''}" data-act="fCat" data-v="">Hammasi</button>${S.settings.cats.map(x => html`<button class="chip ${c.cat === x.id ? 'on' : ''}" data-act="fCat" data-v="${x.id}">${x.name}${x.type === 'inc' ? ' (kirim)' : ''}</button>`)}</div></div>
+          <div class="f"><span class="k">Kategoriya</span><div class="chips"><button class="chip ${!c.cat ? 'on' : ''}" data-act="fCat" data-v="">Hammasi</button>${S.settings.cats.map(x => html`<button class="chip ${c.cat === x.id ? 'on' : ''}" data-act="fCat" data-v="${x.id}">${catName(x.id)}${x.type === 'inc' ? ' (' + T('kirim') + ')' : ''}</button>`)}</div></div>
           <div class="f"><span class="k">Hisob</span><div class="chips"><button class="chip ${!c.acc ? 'on' : ''}" data-act="fAcc" data-v="">Hammasi</button>${S.settings.accounts.map(a => html`<button class="chip ${c.acc === a.id ? 'on' : ''}" data-act="fAcc" data-v="${a.id}">${a.name}</button>`)}</div></div>
         </div>
         <div class="btn2" style="margin-top:20px"><button class="btn ghost sm" data-act="fReset">Tozalash</button><button class="btn pri sm" data-act="fApply">Koʻrsatish</button></div>`,
@@ -3757,16 +4106,47 @@ const ACT = {
   /* AI */
   aiOpen: (el) => (isPremium() ? openAiSheet(el.dataset.h || '') : openPremium('ai')),
   premium: (el) => openPremium(el && el.dataset.r),
+  premPlan: (el, L) => { L.ctx.plan = el.dataset.p; L.rerender(); },
+  premBuy: (el, L) => buyPlan(L.ctx.plan).then(ok => { if (ok) { L.close(); toast('Premium faollashdi — rahmat!'); render(); } }),
+  gift: (el, L) => { if (L) L.close(); openGift(); },
+  giftPlan: (el, L) => { L.ctx.plan = el.dataset.p; L.rerender(); },
+  giftBuy: (el, L) => {
+    const c = L.ctx; if (c.busy) return; c.busy = true; L.rerender();
+    const p = PLANS.find(x => x.id === c.plan);
+    return buyPlan(c.plan, true, c.note.trim()).then(ok => {
+      c.busy = false;
+      if (ok) { const g = ((ME && ME.gifts) || []).slice().sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0]; c.done = g || { months: p.months, note: c.note.trim(), link: '' }; }
+      if (!L.closed) L.rerender();
+    });
+  },
+  giftSend: (el, L) => giftShare(L.ctx.done),
+  giftResend: (el) => { const g = ((ME && ME.gifts) || []).find(x => x.code === el.dataset.code); if (g && !g.redeemed) giftShare(g); },
+  remToggle: () => toggleReminders(),
+  debtShare: () => shareDebt(routeId()),
+  shareImport: (el) => {
+    const s = SHARES && SHARES.toMe.find(x => x.token === el.dataset.t); if (!s) return;
+    addDebt({ person: s.owner_name || 'Doʻst', dir: s.dir === 'given' ? 'taken' : 'given', amount: s.amount, currency: s.currency || 'UZS', date: s.date || today(), due: s.due || '', note: s.note || '', affectsBalance: false });
+    UIP.imported = Object.assign(UIP.imported || {}, { [s.token]: 1 }); saveUIP(); render();
+    toast('Daftarga qoʻshildi');
+  },
+  lang: (el, L) => { if (L) L.close(); setLang(el.dataset.l); },
+  langSheet: () => openLangSheet(),
   clearDebtSearch: () => { UI.debtSearch = ''; render(); const i = $('[data-ui="debtSearch"]'); i && i.focus(); },
   aiEx: (el, L) => { L.ctx.text = AI_EXAMPLES[+el.dataset.i] || ''; L.ctx.res = null; L.ctx.err = ''; L.rerender(); },
   aiGo: async (el, L) => {
     const c = L.ctx; if (c.busy) return;
     const text = (c.text || '').trim(); if (!text) { warn('Avval matn yozing'); return; }
-    const key = aiKey();
+    const key = aiKey(), server = serverReady();
     c.err = ''; c.res = null;
-    if (!key) { c.res = aiLocalParse(text); c.engine = ''; L.rerender(); return; }
+    if (!key && !server) { c.res = aiLocalParse(text); c.engine = ''; L.rerender(); return; }
     c.busy = true; L.rerender();
-    try { c.res = await aiClaude(text, key); c.engine = 'Claude'; }
+    try {
+      if (server) {
+        const r = await api('/api/parse', { text });
+        if (r.kind === 'tx') { L.close(); aiApplyResult('tx', r.data, 'AI toʻldirdi — tekshirib, saqlang'); return; }
+        c.res = aiFinish(aiClean(Object.assign({}, r.data, { kind: r.kind }))); c.engine = 'AI';
+      } else { c.res = await aiClaude(text, key); c.engine = 'Claude'; }
+    }
     catch (e) { c.res = aiLocalParse(text); c.engine = ''; c.err = `Onlayn AI ishlamadi (${e.message}) — oddiy tahlil natijasi koʻrsatildi.`; }
     c.busy = false; if (!L.closed) L.rerender();
   },
@@ -3867,7 +4247,7 @@ const ACT = {
   },
   obFinish: () => {
     const s = defaultSettings();
-    s.onboarded = true; s.welcomed = true; s.name = (OB.uname || '').trim();
+    s.onboarded = true; s.welcomed = true; s.name = (OB.uname || '').trim(); s.lang = UIP.lang || 'uz';
     s.accounts = OB.accounts.filter(a => a.name.trim()).map(a => ({ id: newId('a'), name: a.name.trim(), currency: a.currency, start: a.currency === 'USD' ? parseFloatUz(String(a.start).replace(/\s/g, '')) : parseNum(a.start) }));
     s.budget = parseNum(OB.budget); s.usdRate = parseNum(OB.rate);
     S.settings = s;
@@ -3890,7 +4270,7 @@ function route() {
   return { name: ROUTES.includes(h) ? h : 'asosiy' };
 }
 function applyTheme() {
-  const t = (S.settings && S.settings.theme) || 'auto';
+  const t = (S.settings && S.settings.theme) || 'light';
   let dark = t === 'dark';
   if (t === 'auto') {
     if (IN_TG && WA.colorScheme) dark = WA.colorScheme === 'dark';
@@ -3903,6 +4283,7 @@ function applyTheme() {
 let renderQueued = false;
 function scheduleRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
 function render() {
+  LANG = curLang(); document.documentElement.lang = LANG === 'ru' ? 'ru' : 'uz';
   applyTheme();
   const app = $('#app'), tb = $('#tabbar');
   const ae = document.activeElement, focusKey = ae && ae.dataset && (ae.dataset.ui || (ae.dataset.ob ? ae.dataset.ob + ae.dataset.i : null));
@@ -3934,6 +4315,7 @@ function render() {
     const el = $(`[data-ui="${focusKey}"]`) || $$('[data-ob]').find(x => x.dataset.ob + x.dataset.i === focusKey);
     if (el) { el.focus(); if (caret != null) try { el.setSelectionRange(caret, caret); } catch (e) { } }
   }
+  i18nTree(app); i18nTree(tb);
   fitAll(app);
   tgBackSync();
 }
@@ -3944,7 +4326,7 @@ function onInput(e) {
     const k = el.dataset.ob;
     if (k === 'budget' || k === 'rate' || k === 'start') { const n = parseNum(el.value); el.value = n ? grp(n) : ''; }
     if (k === 'name' || k === 'start') OB.accounts[+el.dataset.i][k] = el.value; else OB[k] = el.value;
-    if (k === 'uname') { const p = $('#obPlate'); if (p) { p.textContent = plateTitle(el.value); p.classList.toggle('empty', !el.value.trim()); } }
+    if (k === 'uname') { const p = $('#obPlate'); if (p) { p.textContent = T(plateTitle(el.value)); p.classList.toggle('empty', !el.value.trim()); } }
     return;
   }
   if (el.dataset.ui) {
@@ -4028,6 +4410,14 @@ function boot() {
   });
   try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { applyTheme(); }); } catch (e) { }
   Sync.attach();
+  // server side (Premium, gifts, shared debts, reminders, drafts from the bot)
+  if (apiOn()) {
+    meRefresh().then(() => remindersSync());
+    sharesRefresh();
+    const sp = (WA.initDataUnsafe && WA.initDataUnsafe.start_param) || '';
+    const dq = new URLSearchParams(location.search).get('draft') || (sp.startsWith('d_') ? sp.slice(2) : '');
+    if (dq) setTimeout(() => draftOpen(dq), 700);
+  }
 }
 
 /* QA hooks */

@@ -19,6 +19,7 @@
   --sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --bg:#F1ECE1;--paper2:#FBF8F1;--ink:#1C1A16;--ink2:#47423A;--muted:#6B6457;--rule:#CBC2AF;--rule2:#DDD5C4;
   --sig:#2436C9;--sig-ink:#FBF8F1;--sig-soft:rgba(36,54,201,.09);--dng:#B8301C;--dng-soft:rgba(184,48,28,.08);--pos:#1F6B3A;--dim:rgba(28,26,22,.45);
+  --exp:#B3261E;--inc:#1B7A3B;--inc-soft:rgba(27,122,59,.1);
   --shadow:0 1px 0 rgba(60,50,30,.08),0 8px 24px -12px rgba(60,50,30,.25);
   --sat:max(env(safe-area-inset-top,0px),calc(var(--tg-safe-area-inset-top,0px) + var(--tg-content-safe-area-inset-top,0px)));
   --sab:max(env(safe-area-inset-bottom,0px),calc(var(--tg-safe-area-inset-bottom,0px) + var(--tg-content-safe-area-inset-bottom,0px)));
@@ -27,6 +28,7 @@
 :root[data-theme=dark]{
   --bg:#121110;--paper2:#1C1A17;--ink:#EDE7DA;--ink2:#C9C2B3;--muted:#9C9585;--rule:#3B3731;--rule2:#2C2925;
   --sig:#8E9CFF;--sig-ink:#121110;--sig-soft:rgba(142,156,255,.12);--dng:#FF7C67;--dng-soft:rgba(255,124,103,.1);--pos:#7FD39A;--dim:rgba(0,0,0,.62);
+  --exp:#FF7F6E;--inc:#6FD291;--inc-soft:rgba(111,210,145,.12);
   --shadow:0 0 0 1px #2A2723;
   color-scheme:dark;
 }
@@ -52,6 +54,10 @@ svg{display:block;flex:none}
 .ibtn:active{background:var(--sig-soft)}
 .pos{color:var(--pos)}
 .dng{color:var(--dng)}
+/* money direction: spent = red with −, added = green with +, credit still owed = blue */
+.exp{color:var(--exp)}
+.inc{color:var(--inc)}
+.owed{color:var(--sig)}
 .muted{color:var(--muted)}
 /* ===================== MASTHEAD ===================== */
 .mast{display:flex;align-items:center;padding:calc(10px + var(--sat)) 10px 0 10px;min-height:54px}
@@ -343,7 +349,52 @@ html.short .save{min-height:52px;margin-top:8px}
 .syncdot{position:fixed;top:calc(var(--sat) + 6px);right:max(8px,calc(50% - 232px));width:7px;height:7px;border-radius:50%;z-index:40;pointer-events:none;opacity:0;transition:opacity .3s}
 .syncdot.saving{opacity:.9;background:var(--sig);animation:blink 1s steps(1) infinite}
 .syncdot.error{opacity:1;background:var(--dng)}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ===================== INTRO + NAME ===================== */
+.intro{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:calc(30px + var(--sat)) 22px calc(22px + var(--sab))}
+.kicker{font-family:var(--monocaps);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);word-spacing:-.15em}
+.intro .word{font-family:var(--disp);font-size:92px;line-height:.86;letter-spacing:-.045em;margin-top:16px}
+.intro .word i{display:block;font-size:30px;line-height:1.1;letter-spacing:-.01em;color:var(--ink2);margin-top:10px}
+.intro .steps{margin-top:34px}
+.intro .lede{color:var(--ink2);font-size:16px;line-height:1.5;margin-top:14px;max-width:34ch}
+.intro .receipt{margin:30px 4px 0}
+.feat{display:flex;align-items:baseline;gap:10px;padding:10px 0;font-size:15.5px}
+.feat .n{font-family:var(--mono);font-size:12px;color:var(--muted);width:18px;flex:none}
+.feat b{font-weight:600;white-space:nowrap}
+.feat .lead{transform:translateY(-3px)}
+.feat .v{font-size:13.5px;color:var(--ink2);text-align:right}
+.intro .cstamp{position:absolute;right:12px;top:-14px;transform:rotate(7deg);background:var(--paper2);font-size:11px;margin:0}
+.intro .cta{margin-top:auto;padding-top:28px}
+.intro .fine{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px;display:flex;justify-content:center;gap:6px;align-items:center}
+.print>*{opacity:0;transform:translateY(8px);animation:print .5s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0) * 110ms)}
+@keyframes print{to{opacity:1;transform:none}}
+.namein{width:100%;border:0;border-bottom:2px solid var(--ink);background:none;font-family:var(--serif);font-size:38px;padding:8px 0 6px;outline:0;border-radius:0;color:var(--ink);margin-top:26px}
+.namein::placeholder{color:var(--rule)}
+.namein:focus{border-bottom-color:var(--sig)}
+.plate{margin:34px auto 0;width:min(300px,100%);border:1.5px solid var(--ink);padding:5px;transform:rotate(-1.5deg);background:var(--paper2);box-shadow:var(--shadow)}
+.plate>div{border:1px solid var(--ink);padding:20px 16px 16px;text-align:center}
+.plate .pk{font-family:var(--monocaps);font-size:11px;letter-spacing:.24em;color:var(--muted)}
+.plate .pt{font-family:var(--serif);font-style:italic;font-size:29px;line-height:1.12;margin-top:10px;overflow-wrap:anywhere}
+.plate .pt.empty{color:var(--rule)}
+.plate .py{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:10px}
+.greet{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--ink2);margin-bottom:10px}
+/* ===================== SCHEME EXPLAINER ===================== */
+.schbtn{display:inline-flex;align-items:center;gap:5px;color:var(--sig);font-weight:600;min-height:44px;margin:-13px 0 -13px;padding-left:8px}
+.lnk{color:var(--sig);font-weight:600}
+.schx{border-top:1px solid var(--ink);padding-top:12px;margin-top:18px}
+.schx-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.schx-h h3{font-family:var(--serif);font-size:22px;font-weight:400}
+.schx p{font-size:14px;color:var(--ink2);margin:6px 0 10px;line-height:1.45}
+.schx svg{margin:2px 0 8px}
+.schkey{display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin-top:12px}
+.schkey i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+/* ===================== AI ===================== */
+.aitag{display:inline-flex;align-items:center;gap:5px;font-family:var(--monocaps);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sig)}
+.aibtn{display:flex;align-items:center;justify-content:center;gap:8px}
+.ailine{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--rule);font-size:14px}
+.ailine .k{color:var(--muted);flex:none;width:44%}
+.ailine .v{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.ailine.miss .v{font-weight:400;color:var(--muted);font-style:italic}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.print>*{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -442,6 +493,9 @@ const P = {
   users: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.1 2.8-5 5.5-5s4.9 1.9 5.5 5"/><path d="M15.5 5.6a3 3 0 0 1 0 5.8"/><path d="M17 14.8c1.8.6 3 2.2 3.4 4.7"/>',
   bank: '<path d="M3.5 9.5L12 4.5l8.5 5"/><path d="M5.5 10.5v7M10 10.5v7M14 10.5v7M18.5 10.5v7M3.5 19.5h17"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  pencil: '<path d="M14.5 5.5l4 4L8.5 19.5H4.5v-4z"/><path d="M12.5 7.5l4 4"/>',
+  help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/>',
+  spark: '<path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1-5.1-1.9 5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>',
   cart: '<path d="M3 4.5h2.2l2 10a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8l1.4-6.5H6"/><circle cx="9.5" cy="19" r="1.2"/><circle cx="16.5" cy="19" r="1.2"/>',
   car: '<path d="M4.5 13.5l1.7-4.4A2 2 0 0 1 8.1 7.8h7.8a2 2 0 0 1 1.9 1.3l1.7 4.4"/><rect x="3.5" y="13.5" width="17" height="4.5" rx="1.2"/><path d="M6.5 18v1.5M17.5 18v1.5"/>',
   house: '<path d="M3.5 11.5L12 5l8.5 6.5"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
@@ -808,7 +862,7 @@ function defaultCats() {
     { id: 'other-inc', name: 'Boshqa', type: 'inc', icon: 'grid' },
   ];
 }
-const defaultSettings = () => ({ v: 1, onboarded: false, accounts: [], cats: defaultCats(), budget: 0, usdRate: 0, theme: 'auto', recurring: [], _u: 0 });
+const defaultSettings = () => ({ v: 1, onboarded: false, welcomed: false, name: '', accounts: [], cats: defaultCats(), budget: 0, usdRate: 0, theme: 'auto', recurring: [], _u: 0 });
 const emptyState = () => ({ settings: null, debts: { people: [], debts: [], payments: [], _u: 0 }, loans: { loans: [], payments: [], _u: 0 }, months: {} });
 
 let S = emptyState();
@@ -1296,6 +1350,40 @@ function undoCardPay(rowId) {
   if (row.txId) { const r = txRemove(row.txId); if (r) docs.push(r.doc); }
   commit(docs);
 }
+/** Edit a loan. Card: fields only. Bank / nasiya: rebuild the schedule from the new terms, keep every real
+ *  payment (amount, date, account, expense link) on its row, and mark rows as paid-before-the-app up to
+ *  paidWanted. Returns { snap } (for undo) or { error }. */
+function editLoan(loanId, patch, paidWanted) {
+  const loan = loanById(loanId); if (!loan) return { error: 'Kredit topilmadi' };
+  const snap = clone(S.loans);
+  if (loan.type === 'card') { Object.assign(loan, patch); commit(['loans']); return { snap }; }
+  const rows = S.loans.payments.filter(r => r.loanId === loanId);
+  const sched = rows.filter(r => !r.extra).sort(calc.rowSort);
+  const KEYS = ['scheme', 'principal', 'total', 'rate', 'term', 'issued', 'payDay'];
+  const termsChanged = KEYS.some(k => patch[k] !== undefined && patch[k] !== loan[k]);
+  const paidNow = sched.filter(r => r.paid).length;
+  if (!termsChanged && paidWanted === paidNow) { loan.name = patch.name; loan.lender = patch.lender; commit(['loans']); return { snap }; }
+  if (rows.some(r => r.extra)) return { error: 'Muddatidan oldin toʻlov qilingan kreditda shartlarni oʻzgartirib boʻlmaydi. Avval jadvaldan oʻsha toʻlovni bekor qiling.' };
+  const realIdx = sched.map((r, i) => (r.paid && !r.pre ? i : -1)).filter(i => i >= 0);
+  const next = Object.assign({}, loan, patch);
+  next.firstDue = addMonths(next.issued, 1, next.payDay);
+  const fresh = calc.buildSchedule(next);
+  if (realIdx.length && realIdx[realIdx.length - 1] >= fresh.length) return { error: `Ilovada ${realIdx.length} ta toʻlov yozilgan — muddat bundan qisqa boʻlolmaydi.` };
+  if (paidWanted < realIdx.length) return { error: `Ilovada ${realIdx.length} ta toʻlov yozilgan. Kamroq qilish uchun ularni jadvaldan bekor qiling.` };
+  let paid = 0;
+  fresh.forEach((nr, i) => {
+    const or = sched[i];
+    if (or) nr.id = or.id; // keeps expense links (tx.loanPayId) valid
+    if (or && or.paid && !or.pre) { nr.paid = or.paid; nr.paidDate = or.paidDate; nr.txId = or.txId; nr.accId = or.accId; paid++; }
+  });
+  const want = Math.min(paidWanted, fresh.length);
+  for (const nr of fresh) { if (paid >= want) break; if (!nr.paid) { nr.paid = nr.total; nr.paidDate = nr.due; nr.pre = true; paid++; } }
+  Object.assign(loan, patch, { firstDue: next.firstDue });
+  S.loans.payments = S.loans.payments.filter(r => r.loanId !== loanId).concat(fresh);
+  updateLoanStatus(loan);
+  commit(['loans']);
+  return { snap };
+}
 function deleteLoan(loanId) {
   const snap = clone(S.loans);
   S.loans.loans = S.loans.loans.filter(l => l.id !== loanId);
@@ -1363,12 +1451,12 @@ function txSub(t, withDate) {
 }
 function txAmt(t) {
   if (t.type === 'tr') return html`<span class="a mono" style="color:var(--ink2)">${money(t.amount, t.currency)}</span>`;
-  if (t.type === 'inc') return html`<span class="a mono pos">+${money(t.amount, t.currency)}</span>`;
-  return html`<span class="a mono">${MINUS}${money(t.amount, t.currency)}</span>`;
+  if (t.type === 'inc') return html`<span class="a mono inc">+${money(t.amount, t.currency)}</span>`;
+  return html`<span class="a mono exp">${MINUS}${money(t.amount, t.currency)}</span>`;
 }
 function txMark(t, fills) {
   if (t.virt) return html`<span>${ic('users', 14, 1.8)}</span>`;
-  if (t.type === 'inc') return html`<span class="pos">${ic('down', 14, 2)}</span>`;
+  if (t.type === 'inc') return html`<span class="inc">${ic('down', 14, 2)}</span>`;
   if (t.type === 'tr') return ic('transfer', 14, 1.8);
   return swatch(fills[t.catId] || OTHER_FILL);
 }
@@ -1406,9 +1494,9 @@ function dayStrip(date, items, fills, style = '') {
     <div class="dash" style="margin-top:10px"></div>
     ${items.map((t, i) => html`${i ? html`<div class="dash"></div>` : ''}${txLine(t, fills)}`)}
     <div style="border-top:1px solid var(--ink);margin-top:4px"></div>
-    <div class="totrow"><span>Chiqim jami</span><span class="mono" style="font-size:16px;font-weight:700">${out ? MINUS + fmt(out) : '0'}</span></div>
+    <div class="totrow"><span>Chiqim jami</span><span class="mono ${out ? 'exp' : ''}" style="font-size:16px;font-weight:700">${out ? MINUS + fmt(out) : '0'}</span></div>
     ${onlyTr ? html`<div class="totrow" style="padding-top:2px;font-size:12.5px;color:var(--muted)"><span>Faqat oʻtkazma va qarz yozuvlari</span></div>` : ''}
-    ${inc ? html`<div class="totrow" style="padding-top:4px"><span>Kirim</span><span class="mono pos" style="font-size:16px">+${fmt(inc)}</span></div>` : ''}
+    ${inc ? html`<div class="totrow" style="padding-top:4px"><span>Kirim</span><span class="mono inc" style="font-size:16px">+${fmt(inc)}</span></div>` : ''}
     ${edge('bot')}</div>`;
 }
 
@@ -1547,13 +1635,13 @@ function viewHome() {
       <div><div class="lbl">Kun</div><div class="mono" style="font-size:22px;margin-top:2px">${dl.daysLeft}</div></div></div>`;
   } else if (isCur) {
     hero = html`<div class="lbl">Bugun sarflandi</div>
-      <div class="hero-n disp" data-fit><span>${fmt(todayExp)}</span><span class="u">soʻm</span></div>
-      <div class="split"><div><div class="lbl">Oy chiqimi</div><div class="mono" style="font-size:22px;margin-top:2px">${fmt(st.expense)} <span class="su">soʻm</span></div></div>
+      <div class="hero-n disp ${todayExp ? 'exp' : ''}" data-fit><span>${todayExp ? MINUS : ''}${fmt(todayExp)}</span><span class="u">soʻm</span></div>
+      <div class="split"><div><div class="lbl">Oy chiqimi</div><div class="mono ${st.expense ? 'exp' : ''}" style="font-size:22px;margin-top:2px">${st.expense ? MINUS : ''}${fmt(st.expense)} <span class="su">soʻm</span></div></div>
       <div><div class="lbl">Kun</div><div class="mono" style="font-size:22px;margin-top:2px">${dl.daysLeft}</div></div></div>`;
   } else {
     hero = html`<div class="lbl">${monthTitle(ym)} chiqimi</div>
-      <div class="hero-n disp" data-fit><span>${fmt(st.expense)}</span><span class="u">soʻm</span></div>
-      <div class="split"><div><div class="lbl">Kirim</div><div class="mono pos" style="font-size:22px;margin-top:2px">+${fmt(st.income)}</div></div>
+      <div class="hero-n disp ${st.expense ? 'exp' : ''}" data-fit><span>${st.expense ? MINUS : ''}${fmt(st.expense)}</span><span class="u">soʻm</span></div>
+      <div class="split"><div><div class="lbl">Kirim</div><div class="mono inc" style="font-size:22px;margin-top:2px">+${fmt(st.income)}</div></div>
       <div><div class="lbl">Yozuv</div><div class="mono" style="font-size:22px;margin-top:2px">${st.count}</div></div></div>`;
   }
 
@@ -1591,9 +1679,9 @@ function viewHome() {
     <div class="acct">${accs.map(a => html`<button data-act="editAcc" data-id="${a.id}">${a.name}<span class="mono ${bal[a.id] < 0 ? 'dng' : ''}">${bal[a.id] < 0 ? MINUS : ''}${money(bal[a.id], a.currency)}</span></button>`)}</div>
     ${tb.missingRate ? html`<div class="lbl" style="font-size:12.5px;margin-top:6px">USD kursi kiritilmagan — dollar hisoblar jamiga qoʻshilmadi.</div>` : ''}
     <div class="hair" style="margin-top:14px"></div>
-    <a class="row" href="#tarix"><span>${monthTitle(ym)} kirimi</span><span class="mono pos">+${fmt(st.income)}</span></a>
+    <a class="row" href="#tarix"><span>${monthTitle(ym)} kirimi</span><span class="mono inc">+${fmt(st.income)}</span></a>
     <div class="dash"></div>
-    <a class="row" href="#tarix"><span>${monthTitle(ym)} chiqimi</span><span class="mono">${st.expense ? MINUS : ''}${fmt(st.expense)}</span></a>
+    <a class="row" href="#tarix"><span>${monthTitle(ym)} chiqimi</span><span class="mono ${st.expense ? 'exp' : ''}">${st.expense ? MINUS : ''}${fmt(st.expense)}</span></a>
   </section>`;
 
   // recent receipt
@@ -1605,7 +1693,7 @@ function viewHome() {
     const tod = monthTx.filter(x => x.date === t).slice(0, 6);
     const older = txs.filter(x => x.date < t).slice(0, tod.length ? 2 : 5);
     rc = html`${tod.map((x, i) => html`${i ? html`<div class="dash"></div>` : ''}${recLine(x)}`)}
-      ${tod.length ? html`<div class="tot" style="border-top:1px solid var(--ink)"><span>Bugun jami</span><span class="mono" style="font-size:16px;font-weight:700">${todayExp ? MINUS : ''}${fmt(todayExp)}</span></div>` : html`<div class="lbl" style="padding:12px 0;text-align:center">Bugun hali yozuv yoʻq</div>`}
+      ${tod.length ? html`<div class="tot" style="border-top:1px solid var(--ink)"><span>Bugun jami</span><span class="mono ${todayExp ? 'exp' : ''}" style="font-size:16px;font-weight:700">${todayExp ? MINUS : ''}${fmt(todayExp)}</span></div>` : html`<div class="lbl" style="padding:12px 0;text-align:center">Bugun hali yozuv yoʻq</div>`}
       ${older.map(x => html`<div class="dash" style="margin-top:${tod.length ? 12 : 0}px"></div>${recLine(x, 'rel')}`)}`;
   } else {
     rc = html`${monthTx.slice(0, 6).map((x, i) => html`${i ? html`<div class="dash"></div>` : ''}${recLine(x, 'date')}`)}`;
@@ -1627,7 +1715,7 @@ function viewHome() {
     </header><hr class="rule2">
     <div class="dateline"><span>${isCur ? dLong(t) : isPast ? 'Oy yakunlangan' : 'Kelgusi oy'}</span><span>${isCur ? `Oy tugashiga ${daysToEnd} kun` : html`<button data-act="monthNow" style="color:var(--sig);font-weight:600">Joriy oyga qaytish</button>`}</span></div>
     <div class="wrap">
-      <section style="margin-top:26px">${hero}</section>
+      <section style="margin-top:26px">${greetLine()}${hero}</section>
       ${budgetSec}${alertSec}${accSec}${recSec}
     </div>${syncNote()}`;
 }
@@ -1680,9 +1768,9 @@ function viewTarix() {
   const shown = days.slice(0, UI.histLimit || 40);
   const fills = catRank(ym).fills;
   const head = global
-    ? html`<div class="sumline"><span class="lbl" style="font-size:13.5px">${real.length} ta yozuv topildi${filtersActive() ? html` · <button data-act="clearFilters" style="color:var(--sig);font-weight:600">filtrni tozalash</button>` : ''}</span><span class="mono" style="font-size:14px"><span class="pos">+${fmt(inc)}</span>&nbsp;&nbsp;<span>${exp ? MINUS : ''}${fmt(exp)}</span></span></div>`
+    ? html`<div class="sumline"><span class="lbl" style="font-size:13.5px">${real.length} ta yozuv topildi${filtersActive() ? html` · <button data-act="clearFilters" style="color:var(--sig);font-weight:600">filtrni tozalash</button>` : ''}</span><span class="mono" style="font-size:14px"><span class="inc">+${fmt(inc)}</span>&nbsp;&nbsp;<span class="${exp ? 'exp' : ''}">${exp ? MINUS : ''}${fmt(exp)}</span></span></div>`
     : html`<div class="sumline" style="margin-top:8px"><div class="mnav"><button class="ibtn" data-act="month" data-d="-1" aria-label="Oldingi oy">${ic('chevL', 20)}</button><span class="serif" style="font-size:21px;white-space:nowrap">${monthTitle(ym)} ${ym.slice(0, 4)}</span><button class="ibtn" data-act="month" data-d="1" aria-label="Keyingi oy">${ic('chevR', 20)}</button></div><span class="lbl" style="font-size:13.5px;white-space:nowrap">${real.length} ta yozuv</span></div>
-      <div class="sumline" style="margin-top:2px;border-top:1px solid var(--rule);padding-top:8px"><span class="lbl" style="font-size:13.5px">Kirim / chiqim</span><span class="mono" style="font-size:14px"><span class="pos">+${fmt(inc)}</span>&nbsp;&nbsp;<span>${exp ? MINUS : ''}${fmt(exp)}</span></span></div>`;
+      <div class="sumline" style="margin-top:2px;border-top:1px solid var(--rule);padding-top:8px"><span class="lbl" style="font-size:13.5px">Kirim / chiqim</span><span class="mono" style="font-size:14px"><span class="inc">+${fmt(inc)}</span>&nbsp;&nbsp;<span class="${exp ? 'exp' : ''}">${exp ? MINUS : ''}${fmt(exp)}</span></span></div>`;
   return html`${histTop('list')}<div class="wrap">${head}
     ${shown.length ? shown.map(d => dayStrip(d.date, d.items, fills)) : html`<div class="receipt strip">${edge('top')}<div class="empty"><div class="serif">${global ? 'Hech narsa topilmadi' : 'Bu oyda yozuv yoʻq'}</div><p>${global ? 'Boshqa soʻz yoki filtr bilan urinib koʻring.' : 'Yangi yozuv qoʻshish uchun + tugmasini bosing.'}</p></div>${edge('bot')}</div>`}
     ${days.length > shown.length ? html`<button class="more" data-act="moreHist" style="margin-top:22px">Oldingi kunlar ${ic('chevD', 16, 2)}</button>` : !global ? html`<button class="more" data-act="month" data-d="-1" style="margin-top:22px">${monthTitle(ymAdd(ym, -1))} ${ic('chevD', 16, 2)}</button>` : ''}
@@ -1721,7 +1809,7 @@ function viewKalendar() {
   return html`${histTop('cal')}<div class="wrap">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
       <div class="mnav"><button class="ibtn" data-act="month" data-d="-1" aria-label="Oldingi oy">${ic('chevL', 20)}</button><span class="serif" style="font-size:22px">${monthTitle(ym)} ${y}</span><button class="ibtn" data-act="month" data-d="1" aria-label="Keyingi oy">${ic('chevR', 20)}</button></div>
-      <span class="mono" style="font-size:15px">${monthExp ? MINUS : ''}${fmt(monthExp)}</span>
+      <span class="mono ${monthExp ? 'exp' : ''}" style="font-size:15px">${monthExp ? MINUS : ''}${fmt(monthExp)}</span>
     </div>
     <div class="cal-wd">${wd}</div>
     <div class="cal">${cells}</div>
@@ -1761,7 +1849,7 @@ function viewQarzlar() {
   const tab = UI.debtTab;
   const closedCount = ds.closedDebts.length;
   const any = ds.owe.length + ds.iowe.length + ds.even.length > 0;
-  const right = html`<button class="ibtn" data-act="toggleDebtSearch" style="margin-right:4px" aria-label="Qidirish">${ic('search', 22)}</button>`;
+  const right = html`<button class="ibtn" data-act="aiOpen" data-h="debt" style="color:var(--sig)" aria-label="AI bilan yozish">${ic('spark', 22, 1.6)}</button><button class="ibtn" data-act="toggleDebtSearch" style="margin-right:4px" aria-label="Qidirish">${ic('search', 22)}</button>`;
   return html`${mastList('Qarzlar', right)}<div class="wrap">
     ${UI.debtSearchOpen ? html`<label class="searchbar">${ic('search', 18)}<input type="search" data-ui="debtSearch" placeholder="Ism boʻyicha qidirish" value="${UI.debtSearch}" autocomplete="off"></label>` : ''}
     <section style="margin-top:22px">
@@ -1786,6 +1874,7 @@ function viewQarzlar() {
     </div>` : html`<div class="receipt strip" style="margin-top:26px">${edge('top')}<div class="empty"><div class="serif">Ochiq qarz yoʻq</div><p>Kimgadir pul bersangiz yoki olsangiz, shu yerga yozib qoʻying — qoldiq va muddat oʻzi kuzatiladi.</p></div>${edge('bot')}</div>`}
     ${closedCount ? html`<button class="linkrow" data-act="debtArchive" style="padding-left:56px">${ic('archive', 20, 1.5)}<span style="flex:1;text-align:left">Yopilgan qarzlar (${closedCount})</span>${ic('chevR', 18)}</button>` : ''}
     <button class="btn pri" data-act="addDebt" style="margin-top:22px">${ic('plus', 20, 2)}Qarz yozish</button>
+    <button class="btn ghost aibtn" data-act="aiOpen" data-h="debt" style="margin-top:10px">${ic('spark', 19, 1.7)}AI bilan yozish</button>
   </div>`;
 }
 
@@ -1873,6 +1962,59 @@ function viewQarz(pid) {
 /* ---------- Kreditlar ---------- */
 const SCHEME_NAME = { annuity: 'Annuitet', diff: 'Differensial', flat: 'Flat' };
 const TYPE_NAME = { bank: 'bank krediti', installment: 'nasiya', card: 'kredit karta' };
+const SCHEME_HELP = {
+  annuity: 'Har oy bir xil summa toʻlaysiz. Boshida toʻlovning koʻp qismi foizga ketadi, oxiriga kelib asosiy qarzga.',
+  diff: 'Asosiy qarz har oy teng qismda toʻlanadi, foiz esa qolgan qarzga hisoblanadi: birinchi toʻlovlar katta, keyin har oy kamayadi.',
+  flat: 'Ustama bilan jami narx oylar soniga teng boʻlinadi — har oy bir xil summa toʻlanadi.',
+};
+/** stacked monthly bars: principal (ink) at the bottom, interest (blue) on top */
+function schemeBars(rows, W, H = 72) {
+  const n = rows.length, gap = n > 30 ? 0.6 : n > 14 ? 1.5 : 3, bw = Math.max(0.6, (W - gap * (n - 1)) / n);
+  const M = Math.max(...rows.map(r => r.total)) || 1;
+  let g = '';
+  rows.forEach((r, i) => {
+    const x = (i * (bw + gap)).toFixed(2), hp = r.principal / M * H, hi = r.interest / M * H;
+    g += `<rect x="${x}" y="${(H - hp).toFixed(2)}" width="${bw.toFixed(2)}" height="${hp.toFixed(2)}" style="fill:var(--ink)"/>`;
+    if (hi > 0.3) g += `<rect x="${x}" y="${(H - hp - hi).toFixed(2)}" width="${bw.toFixed(2)}" height="${hi.toFixed(2)}" style="fill:var(--sig)"/>`;
+  });
+  return raw(`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${g}</svg>`);
+}
+/** plain-language explainer of annuity / differentiated / flat, using the user's own loan when given */
+function openSchemeInfo(loanId, draft) {
+  const l = draft || (loanId ? loanById(loanId) : null);
+  const W = Math.min(contentW(), 436);
+  const key = html`<div class="schkey"><span><i style="background:var(--ink)"></i>asosiy qarz</span><span><i style="background:var(--sig)"></i>foiz</span></div>`;
+  if (l && l.scheme === 'flat') {
+    const rows = calc.buildSchedule(l);
+    openLayer({
+      label: 'Nasiya sxemasi', render: () => html`${sheetHead('Nasiya: teng ulush (flat)', `${l.name}: ${fmt(l.total)} soʻm, ${l.term} oy`)}
+        <div class="schx"><p>${SCHEME_HELP.flat}</p>${schemeBars(rows, W)}${key}
+        <div class="dl"><div>Oylik toʻlov<span class="lead"></span><span class="mono">${fmt(rows[0] ? rows[0].total : 0)}</span></div>
+        ${l.principal && l.principal < l.total ? html`<div>Ustama<span class="lead"></span><span class="mono">${fmt(l.total - l.principal)} · ${Math.round((l.total / l.principal - 1) * 100)}%</span></div>` : ''}</div></div>
+        <p class="lbl" style="font-size:13px;margin-top:14px">Nasiyada foiz emas, shartnomadagi “ustama bilan jami narx” muhim. Muddatidan oldin toʻlasangiz, qolgan oylar qisqaradi yoki oylik toʻlov kamayadi.</p>`,
+    });
+    return;
+  }
+  const own = l && l.type === 'bank';
+  const P = own ? l.principal : 12000000, r = own ? l.rate : 24, n = own ? l.term : 12;
+  const base = { balance: P, rate: r, n, firstDue: '2026-01-15', payDay: 15 };
+  const A = calc.genRows({ ...base, scheme: 'annuity' }), D = calc.genRows({ ...base, scheme: 'diff' });
+  const iA = sum(A, 'interest'), iD = sum(D, 'interest');
+  const mine = s => own && l.scheme === s ? stamp('s', 'sizda shu', 'margin:0;font-size:10.5px') : '';
+  openLayer({
+    label: 'Toʻlov sxemalari', render: () => html`${sheetHead('Annuitet va differensial', own ? `${l.name}: ${fmt(P)} soʻm, ${r}% yillik, ${n} oy` : `Misol: ${fmt(P)} soʻm, ${r}% yillik, ${n} oy`)}
+      <p class="lbl" style="font-size:13.5px;margin-top:10px">Bular bank qarzni qanday boʻlib olishini bildiradi. Pulni bir xil olasiz, farq — har oy qancha toʻlashingiz va jami qancha foiz ketishida.</p>
+      <div class="schx"><div class="schx-h"><h3 class="serif">Annuitet</h3>${mine('annuity')}</div>
+        <p>${SCHEME_HELP.annuity}</p>${schemeBars(A, W)}
+        <div class="dl"><div>Har oy<span class="lead"></span><span class="mono" style="font-weight:700">${fmt(A[0].total)}</span></div><div>Jami foiz<span class="lead"></span><span class="mono">${fmt(iA)}</span></div></div></div>
+      <div class="schx"><div class="schx-h"><h3 class="serif">Differensial</h3>${mine('diff')}</div>
+        <p>${SCHEME_HELP.diff}</p>${schemeBars(D, W)}
+        <div class="dl"><div>Birinchi oy<span class="lead"></span><span class="mono" style="font-weight:700">${fmt(D[0].total)}</span></div><div>Oxirgi oy<span class="lead"></span><span class="mono">${fmt(D[D.length - 1].total)}</span></div><div>Jami foiz<span class="lead"></span><span class="mono">${fmt(iD)}</span></div></div></div>
+      ${key}
+      <div class="box" style="font-size:13.5px;margin-top:14px">Differensialda jami foiz <b class="mono">${fmt(Math.max(0, iA - iD))}</b> soʻm kam, lekin birinchi oyda toʻlov <b class="mono">${fmt(Math.max(0, D[0].total - A[0].total))}</b> soʻm koʻproq.</div>
+      <p class="lbl" style="font-size:13px;margin-top:12px"><b style="color:var(--ink)">Qaysi biri sizda?</b> Shartnomadagi toʻlov jadvaliga qarang: har oy bir xil summa boʻlsa — annuitet, har oy kamayib borsa — differensial.</p>`,
+  });
+}
 function loanCard(l) {
   const W = contentW() - 42;
   if (l.type === 'card') {
@@ -1881,7 +2023,7 @@ function loanCard(l) {
     return html`<a class="contract" href="#kredit-${l.id}"><div class="in">
       <div class="ctop"><div><div class="serif">${l.name}</div><div class="lbl" style="font-size:13px;margin-top:2px">${l.lender ? l.lender + ', ' : ''}kredit karta</div></div><span style="color:var(--muted);padding-top:4px">${ic('chevR', 20)}</span></div>
       <div class="terms"><div>Limit<span class="mono">${compact(cs.limit)}</span></div><div>Imtiyoz<span class="mono">${l.grace ? l.grace + ' kun' : '—'}</span></div><div>Foiz<span class="mono">${l.rate || 0}%</span></div></div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="lbl">Ishlatilgan</span><span class="mono" style="font-size:22px">${fmt(cs.used)}</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="lbl">Ishlatilgan</span><span class="mono owed" style="font-size:22px">${fmt(cs.used)}</span></div>
       ${contBar(cs.frac, W)}
       <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12.5px;color:var(--muted)"><span>Limit ${fmt(cs.limit)}</span><span class="mono" style="word-spacing:-.25em">Mavjud ${fmt(cs.avail)}</span></div>
       <div class="cfoot"><span><span class="lbl" style="font-size:13.5px">Minimal toʻlov:</span> <b style="font-weight:600">${dMid(cs.nextDue)}</b>${cs.due && rd.k <= 7 ? html` ${stamp('s', rd.text, 'margin:0 0 0 4px;font-size:10.5px')}` : ''}</span><span class="mono" style="font-size:16px;font-weight:700">${cs.due ? fmt(cs.minPay - cs.paidCycle) : cs.used ? 'toʻlandi' : '0'}</span></div>
@@ -1897,7 +2039,7 @@ function loanCard(l) {
   return html`<a class="contract" href="#kredit-${l.id}"><div class="in">
     <div class="ctop"><div><div class="serif">${l.name}</div><div class="lbl" style="font-size:13px;margin-top:2px">${l.lender ? l.lender + ', ' : ''}${TYPE_NAME[l.type]}</div></div><span style="color:var(--muted);padding-top:4px">${ic('chevR', 20)}</span></div>
     <div class="terms">${terms.map(([k, v]) => html`<div>${k}<span class="mono">${v}</span></div>`)}</div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="lbl">Qolgan qarz</span><span class="mono" style="font-size:22px">${fmt(s.remaining)}</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="lbl">Qolgan qarz</span><span class="mono owed" style="font-size:22px">${fmt(s.remaining)}</span></div>
     ${payRuler(s.count, s.paidCount, W, late)}
     <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12.5px;color:var(--muted)"><span>${s.paidCount} / ${s.count} toʻlangan</span><span class="mono" style="word-spacing:-.25em">${flat ? 'Jami narx ' + fmt(l.total) : Math.round(s.paidCount / (s.count || 1) * 100) + '%'}</span></div>
     ${s.closed ? html`<div class="cfoot"><span class="lbl">Kredit yopilgan</span>${stamp('p', 'Yopildi', 'margin:0')}</div>`
@@ -1920,10 +2062,10 @@ function viewKreditlar() {
     total += s.remaining; monthly += s.payment;
     if (!nextDue || s.next.due < nextDue) nextDue = s.next.due;
   }
-  return html`${mastList('Kreditlar')}<div class="wrap">
+  return html`${mastList('Kreditlar', html`<button class="ibtn" data-act="aiOpen" data-h="loan" style="margin-right:4px;color:var(--sig)" aria-label="AI bilan qoʻshish">${ic('spark', 22, 1.6)}</button>`)}<div class="wrap">
     <section style="margin-top:22px">
       <div class="lbl">Jami qolgan qarz</div>
-      <div class="big2 disp" style="font-size:60px" data-fit><span>${fmt(total)}</span><span class="u">soʻm</span></div>
+      <div class="big2 disp owed" style="font-size:60px" data-fit><span>${fmt(total)}</span><span class="u">soʻm</span></div>
       <div class="split">
         <div><div class="lbl">Oylik toʻlov jami</div><div class="mono" style="font-size:20px;margin-top:2px">${fmt(monthly)}</div></div>
         <div><div class="lbl">Keyingi toʻlov</div><div class="${nextDue && nextDue < today() ? 'dng' : ''}" style="font-size:17px;font-weight:600;margin-top:3px;white-space:nowrap">${nextDue ? dMid(nextDue) : '—'}</div></div>
@@ -1931,6 +2073,7 @@ function viewKreditlar() {
     </section>
     ${active.length ? active.map(loanCard) : html`<div class="receipt strip" style="margin-top:26px">${edge('top')}<div class="empty"><div class="serif">Kredit yoʻq</div><p>Bank krediti, nasiya yoki kredit kartani qoʻshing — toʻlov jadvali avtomatik tuziladi.</p></div>${edge('bot')}</div>`}
     <button class="btn ${active.length ? 'ghost' : 'pri'}" data-act="addLoan" style="margin-top:22px">${ic('plus', 20, 2)}Kredit qoʻshish</button>
+    <button class="btn ghost aibtn" data-act="aiOpen" data-h="loan" style="margin-top:10px">${ic('spark', 19, 1.7)}AI bilan qoʻshish</button>
     ${closed.length ? html`<button class="linkrow" data-act="toggleClosedLoans" style="margin-top:12px">${ic('archive', 20, 1.5)}<span style="flex:1;text-align:left">Yopilgan kreditlar (${closed.length})</span>${ic(UI.showClosedLoans ? 'chevD' : 'chevR', 18)}</button>${UI.showClosedLoans ? closed.map(loanCard) : ''}` : ''}
   </div>`;
 }
@@ -1966,11 +2109,11 @@ function viewKredit(id) {
     ? [['Tovar narxi', l.principal ? fmt(l.principal) : '—'], ['Ustama bilan jami', fmt(l.total)], ['Muddat', l.term + ' oy'], ['Olingan', dShort(l.issued, true)], ['Oylik toʻlov', fmt(s.payment || 0), true]]
     : [['Asosiy summa', fmt(l.principal)], ['Foiz', l.rate + '% yillik'], ['Muddat', l.term + ' oy'], ['Boshlangan', dShort(l.issued, true)], ['Oylik toʻlov', fmt(s.payment || 0), true]];
   return html`${mastDetail(l.name, 'kreditlar', 'loanMenu')}
-  <div class="dateline"><span>${l.lender ? l.lender + ', ' : ''}${TYPE_NAME[l.type]}</span><span>${SCHEME_NAME[l.scheme]}</span></div>
+  <div class="dateline"><span>${l.lender ? l.lender + ', ' : ''}${TYPE_NAME[l.type]}</span><button class="schbtn" data-act="schemeInfo" data-id="${l.id}" aria-label="${SCHEME_NAME[l.scheme]} nima degani">${SCHEME_NAME[l.scheme]}${ic('help', 16, 1.6)}</button></div>
   <div class="wrap">
     <section style="margin-top:24px">
       <div class="lbl">${flat ? 'Qolgan qarz' : 'Qolgan asosiy qarz'}</div>
-      <div class="big2 disp" style="font-size:60px" data-fit><span>${fmt(s.remaining)}</span><span class="u">soʻm</span></div>
+      <div class="big2 disp owed" style="font-size:60px" data-fit><span>${fmt(s.remaining)}</span><span class="u">soʻm</span></div>
       ${late ? html`<div style="margin-top:10px">${stamp('d', `${s.overdue.length} ta toʻlov muddati oʻtdi`)}</div>` : s.closed ? html`<div style="margin-top:10px">${stamp('p', 'Kredit yopildi')}</div>` : ''}
       <div style="margin-top:16px">${payRuler(s.count, s.paidCount, W, late)}</div>
       <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:13px;color:var(--muted)"><span>${s.paidCount} / ${s.count} toʻlov</span><span>Tugaydi: ${s.end ? dShort(s.end, true) : '—'}</span></div>
@@ -1987,6 +2130,7 @@ function viewKredit(id) {
     </section>
     ${s.next ? html`<button class="btn ${late ? 'pri' : 'pri'}" data-act="loanPay" data-id="${id}" style="margin-top:20px;${late ? 'background:var(--dng)' : ''}">${ic('check', 20, 2)}${dMid(s.next.due)} toʻlovini qildim</button>
       <button class="btn ghost" data-act="loanEarly" data-id="${id}" style="margin-top:10px">Muddatidan oldin toʻlash</button>` : ''}
+    <button class="btn ghost" data-act="loanEdit" data-id="${id}" style="margin-top:10px">${ic('pencil', 18, 1.6)}Tahrirlash</button>
   </div>`;
 }
 const dash = () => html`<span style="color:var(--muted)">–</span>`;
@@ -1998,7 +2142,7 @@ function viewCard(l) {
   <div class="wrap">
     <section style="margin-top:24px">
       <div class="lbl">Ishlatilgan</div>
-      <div class="big2 disp" style="font-size:60px" data-fit><span>${fmt(cs.used)}</span><span class="u">soʻm</span></div>
+      <div class="big2 disp owed" style="font-size:60px" data-fit><span>${fmt(cs.used)}</span><span class="u">soʻm</span></div>
       ${contBar(cs.frac, W)}
       <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:13px;color:var(--muted)"><span>Limit ${fmt(cs.limit)}</span><span>Mavjud ${fmt(cs.avail)}</span></div>
     </section>
@@ -2014,6 +2158,7 @@ function viewCard(l) {
       <div class="list" style="margin-top:8px">${pays.slice(0, 12).map(p => html`<button data-act="schRow" data-id="${p.id}"><div class="grow"><div class="t">${dMid(p.paidDate)}</div><div class="s">${p.accId ? accName(p.accId) : ''}</div></div><span class="mono">${fmt(p.paid)}</span></button>`)}</div></section>` : ''}
     <button class="btn pri" data-act="cardPay" data-id="${l.id}" style="margin-top:24px">${ic('check', 20, 2)}Toʻlov qildim</button>
     <button class="btn ghost" data-act="cardUsed" data-id="${l.id}" style="margin-top:10px">Ishlatilgan summani yangilash</button>
+    <button class="btn ghost" data-act="loanEdit" data-id="${l.id}" style="margin-top:10px">${ic('pencil', 18, 1.6)}Tahrirlash</button>
   </div>`;
 }
 
@@ -2028,6 +2173,11 @@ function viewSozlamalar() {
   return html`${mastDetail('Sozlamalar', 'asosiy')}
   <div class="wrap">
     <section class="sec" style="margin-top:24px">
+      <div class="dl" style="border-top:1px solid var(--ink)">
+        <button data-act="setName" style="width:100%">Ismingiz<span class="lead"></span><span>${s.name || 'kiritilmagan'}</span></button>
+      </div>
+    </section>
+    <section class="sec">
       <div class="sechead"><h2>Hisoblar</h2><span class="lbl">${s.accounts.filter(a => !a.archived).length} ta</span></div>
       <div class="list" style="margin-top:8px;border-top:1px solid var(--ink)">
         ${s.accounts.map(a => html`<button data-act="editAcc" data-id="${a.id}" ${a.archived ? raw('style="opacity:.55"') : ''}><span style="color:var(--muted)">${ic(a.currency === 'USD' ? 'wallet' : 'card', 20, 1.5)}</span><div class="grow"><div class="t">${a.name}${a.archived ? ' (arxiv)' : ''}</div><div class="s">${a.currency} · boshlangʻich ${money(a.start || 0, a.currency)}</div></div><span class="mono ${bal[a.id] < 0 ? 'dng' : ''}">${bal[a.id] < 0 ? MINUS : ''}${money(bal[a.id], a.currency)}</span></button>`)}
@@ -2053,10 +2203,17 @@ function viewSozlamalar() {
       </div>
     </section>
     <section class="sec">
+      <div class="sechead"><h2>AI yordamchi</h2><span class="aitag">${ic('spark', 14, 1.6)}${aiKey() ? 'Claude' : 'ichki'}</span></div>
+      <div class="dl" style="border-top:1px solid var(--ink);margin-top:10px">
+        <button data-act="aiKeySheet" style="width:100%">Claude API kaliti<span class="lead"></span><span>${aiKey() ? 'ulangan' : 'yoʻq'}</span></button>
+      </div>
+      <p class="lbl" style="font-size:12.5px;margin-top:8px">Kreditlar va Qarzlar sahifasidagi ✦ tugmasi matndan formani toʻldiradi. Kalitsiz ham ishlaydi.</p>
+    </section>
+    <section class="sec">
       <div class="sechead"><h2>Takroriy toʻlovlar</h2><span class="lbl">${recs.length} ta</span></div>
       ${recs.length ? html`<div class="list" style="margin-top:8px;border-top:1px solid var(--ink)">${recs.map(r => {
         const nx = calc.nextOccurrence(r, r.lastDone || addDays(r.start, -1));
-        return html`<button data-act="editRec" data-id="${r.id}"><span style="color:var(--ink2)">${ic('repeat', 20, 1.5)}</span><div class="grow"><div class="t">${r.note || (r.type === 'tr' ? 'Oʻtkazma' : catName(r.catId))}</div><div class="s">${r.freq === 'weekly' ? 'Har hafta' : 'Har oy'} · keyingisi ${nx ? dMid(nx) : '—'}</div></div><span class="mono ${r.type === 'inc' ? 'pos' : ''}">${r.type === 'inc' ? '+' : r.type === 'exp' ? MINUS : ''}${money(r.amount, r.currency)}</span></button>`;
+        return html`<button data-act="editRec" data-id="${r.id}"><span style="color:var(--ink2)">${ic('repeat', 20, 1.5)}</span><div class="grow"><div class="t">${r.note || (r.type === 'tr' ? 'Oʻtkazma' : catName(r.catId))}</div><div class="s">${r.freq === 'weekly' ? 'Har hafta' : 'Har oy'} · keyingisi ${nx ? dMid(nx) : '—'}</div></div><span class="mono ${r.type === 'inc' ? 'inc' : r.type === 'exp' ? 'exp' : ''}">${r.type === 'inc' ? '+' : r.type === 'exp' ? MINUS : ''}${money(r.amount, r.currency)}</span></button>`;
       })}</div>` : html`<p class="lbl" style="margin-top:8px;font-size:13.5px">Yozuv qoʻshishda “Takroriy” maydonini tanlang — masalan, ijara yoki maosh har oy oʻzi yoziladi.</p>`}
     </section>
     <section class="sec">
@@ -2082,15 +2239,67 @@ function viewSozlamalar() {
 }
 
 /* ---------- Onboarding ---------- */
-const OB = { step: 1, accounts: [{ name: 'Naqd', currency: 'UZS', start: '' }, { name: 'Karta', currency: 'UZS', start: '' }], budget: '', rate: '' };
+const OB = { step: 'intro', uname: null, accounts: [{ name: 'Naqd', currency: 'UZS', start: '' }, { name: 'Karta', currency: 'UZS', start: '' }], budget: '', rate: '' };
+const tgFirstName = () => { try { return String((WA && WA.initDataUnsafe && WA.initDataUnsafe.user && WA.initDataUnsafe.user.first_name) || '').slice(0, 24); } catch (e) { return ''; } };
+const plateTitle = n => (n || '').trim() ? `${n.trim()}ning daftari` : 'Ismingizning daftari';
+/** first screen: what this app is — a receipt that "prints" line by line */
+function viewIntro() {
+  const feats = [['Kirim va chiqim', '3 bosishda'], ['Qarzlar', 'kim, qancha, qachon'], ['Kreditlar', 'jadval oʻzi tuziladi'], ['Byudjet', 'bugungi limit'], ['AI yordamchi', 'matndan toʻldiradi']];
+  return html`<div class="intro">
+    <div class="print">
+      <div class="kicker" style="--i:0">№ 001 · shaxsiy moliya daftari</div>
+      <div class="word" style="--i:1">Xarajat<i>pulingiz qayerga ketyapti?</i></div>
+      <p class="lede" style="--i:2">Telegram ichidagi daftar: har bir soʻmni yozasiz, qarz va kreditlarni kuzatasiz — oy oxirida “pul qayerga ketdi?” degan savol qolmaydi.</p>
+    </div>
+    <div class="receipt print">${edge('top')}
+      <span class="stamp s cstamp" style="--i:9">reklamasiz</span>
+      <div class="rc-head" style="--i:3"><div class="serif">Bu daftarda</div><div class="mono">${dNum(today())}</div></div>
+      <div class="dash" style="margin-top:12px;--i:3"></div>
+      ${feats.map(([k, v], i) => html`<div class="feat" style="--i:${4 + i}"><span class="n">0${i + 1}</span><b>${k}</b><span class="lead"></span><span class="v">${v}</span></div>`)}
+      <div style="border-top:1px solid var(--ink);margin-top:6px;--i:9"></div>
+      <div class="tot" style="--i:9"><span>Narxi</span><span class="mono" style="font-size:16px;font-weight:700">0 soʻm</span></div>
+    ${edge('bot')}</div>
+    <div class="cta">
+      <button class="btn pri" data-act="obStart">Boshlash ${ic('chevR', 18, 2)}</button>
+      <div class="fine">${ic('cloud', 14, 1.5)}<span>${IN_TG ? 'Maʼlumotlar Telegram bulutida — faqat sizga koʻrinadi' : 'Maʼlumotlar shu qurilmada saqlanadi'}</span></div>
+    </div>
+  </div>`;
+}
+/** second screen: the user's name, previewed on a notebook label */
+function viewName(existing) {
+  if (OB.uname == null) OB.uname = tgFirstName();
+  const n = OB.uname;
+  return html`<div class="intro">
+    <div class="print">
+      <div class="kicker" style="--i:0">${existing ? 'Yangi' : '1-qadam'} · tanishuv</div>
+      <div class="word" style="--i:1;font-size:66px">Tanishaylik</div>
+      <p class="lede" style="--i:2">Daftar kimniki? Ismingizni yozing — har safar shu nom bilan kutib olamiz.</p>
+    </div>
+    <input class="namein" data-ob="uname" value="${n}" placeholder="Ismingiz" maxlength="24" autocomplete="given-name" enterkeyhint="next" aria-label="Ismingiz">
+    <div class="plate" aria-hidden="true"><div>
+      <div class="pk">XARAJAT</div>
+      <div class="pt ${n.trim() ? '' : 'empty'}" id="obPlate">${plateTitle(n)}</div>
+      <div class="py">${today().slice(0, 4)}</div>
+    </div></div>
+    ${existing ? '' : html`<div class="steps"><i class="on"></i><i></i><i></i></div>`}
+    <div class="cta">
+      <button class="btn pri" data-act="obName">Davom etish ${ic('chevR', 18, 2)}</button>
+      <button class="more" data-act="obTo" data-s="intro">${ic('chevL', 16, 2)} Orqaga</button>
+    </div>
+  </div>`;
+}
 function viewOnboarding() {
+  const existing = !!(S.settings && S.settings.onboarded);
+  if (OB.step === 'intro' || (existing && OB.step !== 'name')) return viewIntro();
+  if (OB.step === 'name') return viewName(existing);
+  const who = (OB.uname || '').trim();
   if (OB.step === 1) {
     return html`<div class="ob-hero">
-      <div class="lbl">Shaxsiy moliya daftari</div>
-      <div class="disp" style="margin-top:8px">Xarajat</div>
+      <div class="lbl">2-qadam</div>
+      <div class="disp" style="margin-top:8px;font-size:56px">Hisoblar</div>
       <hr class="rule2" style="margin:16px 0 0">
-      <p>Kirim-chiqim, qarzlar va kreditlar — bir daftarda. Avval hisoblaringizni va hozirgi qoldiqlarni yozing.</p>
-      <div class="steps"><i class="on"></i><i></i></div>
+      <p>${who ? `Salom, ${who}! ` : ''}Pulingiz qayerlarda turadi? Hisoblaringizni va hozirgi qoldiqlarni yozing.</p>
+      <div class="steps"><i class="on"></i><i class="on"></i><i></i></div>
     </div>
     <div class="wrap">
       <section class="sec" style="margin-top:26px">
@@ -2106,14 +2315,15 @@ function viewOnboarding() {
         <p class="lbl" style="font-size:12.5px;margin-top:6px">Masalan: Naqd, Humo, Uzcard, Dollar. Keyin Sozlamalarda oʻzgartirish mumkin.</p>
       </section>
       <button class="btn pri" data-act="obNext" style="margin-top:26px">Davom etish ${ic('chevR', 18, 2)}</button>
+      <button class="more" data-act="obTo" data-s="name">${ic('chevL', 16, 2)} Orqaga</button>
     </div>${syncNote()}`;
   }
   return html`<div class="ob-hero">
-      <div class="lbl">2-qadam</div>
+      <div class="lbl">3-qadam</div>
       <div class="disp" style="margin-top:8px;font-size:52px">Byudjet</div>
       <hr class="rule2" style="margin:16px 0 0">
       <p>Oylik byudjet belgilansa, har kuni “bugun yana qancha sarflash mumkin”ligini koʻrsatamiz. Ixtiyoriy.</p>
-      <div class="steps"><i class="on"></i><i class="on"></i></div>
+      <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i></div>
     </div>
     <div class="wrap"><div class="form" style="margin-top:22px">
       <label class="f"><span class="k">Oylik byudjet, soʻm</span><input class="num" inputmode="numeric" data-ob="budget" value="${OB.budget}" placeholder="masalan, 9 000 000"></label>
@@ -2125,18 +2335,25 @@ function viewOnboarding() {
     <button class="more" data-act="importJson" style="color:var(--muted);font-weight:500">Zaxiradan tiklash</button>
     </div>`;
 }
+/** “Xayrli tong, Sardor” above the home hero */
+function greetLine() {
+  const n = S.settings && S.settings.name; if (!n) return '';
+  const h = new Date().getHours();
+  const g = h >= 5 && h < 11 ? 'Xayrli tong' : h >= 11 && h < 17 ? 'Xayrli kun' : h >= 17 && h < 22 ? 'Xayrli kech' : 'Xayrli tun';
+  return html`<div class="greet">${g}, ${n}</div>`;
+}
 
 /* =====================================================================
    12. COMPONENTS — layers (sheets/dialogs), toast, fit-text
    ===================================================================== */
 const layers = [];
-function openLayer({ render, ctx = {}, center = false, onInput, onKey, onClose, label = '' }) {
+function openLayer({ render, ctx = {}, center = false, onInput, onKey, onClose, onSave, label = '' }) {
   const el = document.createElement('div');
   el.className = 'layer' + (center ? ' center' : '');
   el.innerHTML = `<div class="dim"></div><div class="sheetwrap">${center ? '' : edge('top').s}<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(label)}"></div></div>`;
   $('#layers').appendChild(el);
   const L = {
-    el, ctx, render, onInput, onKey, onClose, closed: false,
+    el, ctx, render, onInput, onKey, onClose, onSave, closed: false,
     sheet: el.querySelector('.sheet'),
     rerender() { const st = this.sheet.scrollTop; this.sheet.innerHTML = render(ctx, L).s; this.sheet.scrollTop = st; fitAll(this.sheet); },
     part(sel, content) { const n = this.sheet.querySelector(sel); if (n) { n.innerHTML = sv(content); fitAll(n.parentElement || n); } },
@@ -2290,7 +2507,8 @@ function afHint(AF) {
 function afAmountHTML(AF) {
   const cur = AF.type === 'tr' ? (accById(AF.accId) || {}).currency || 'UZS' : AF.cur;
   const v = AF.digits ? (cur === 'USD' ? grp(AF.digits) : grp(AF.digits)) : '0';
-  return html`<span>${cur === 'USD' ? '$' : ''}${v}</span><span class="caret"></span><span class="u">${cur === 'USD' ? 'dollar' : 'soʻm'}</span>`;
+  const sg = AF.digits ? (AF.type === 'exp' ? MINUS : AF.type === 'inc' ? '+' : '') : '';
+  return html`<span>${sg}${cur === 'USD' ? '$' : ''}${v}</span><span class="caret"></span><span class="u">${cur === 'USD' ? 'dollar' : 'soʻm'}</span>`;
 }
 function afSaveHTML(AF) {
   const cur = AF.type === 'tr' ? (accById(AF.accId) || {}).currency || 'UZS' : AF.cur;
@@ -2301,7 +2519,7 @@ function afSaveHTML(AF) {
 function afRefresh(L) {
   const AF = L.ctx;
   const a = L.sheet.querySelector('#afAmt');
-  if (a) { a.innerHTML = afAmountHTML(AF).s; a.classList.toggle('empty', !AF.digits); fitEl(a); }
+  if (a) { a.innerHTML = afAmountHTML(AF).s; a.classList.toggle('empty', !AF.digits); a.classList.toggle('exp', AF.type === 'exp'); a.classList.toggle('inc', AF.type === 'inc'); fitEl(a); }
   L.part('#afHint', afHint(AF));
   const s = L.sheet.querySelector('#afSave'); if (s) { s.innerHTML = afSaveHTML(AF).s; s.disabled = !afValid(AF); }
 }
@@ -2324,7 +2542,7 @@ function renderTxSheet(AF) {
   return html`
     ${edit ? html`<div class="shead" style="margin-bottom:8px"><h3>Yozuvni tahrirlash</h3><button class="ibtn" data-act="close" aria-label="Yopish">${ic('x', 22)}</button></div>` : html`<div style="display:flex;justify-content:flex-end;margin:-6px -10px -8px 0"><button class="ibtn" data-act="close" aria-label="Yopish" style="width:36px;height:36px">${ic('x', 20)}</button></div>`}
     ${typesRow}
-    <div class="amtrow"><div class="amt-big disp ${AF.digits ? '' : 'empty'}" id="afAmt" data-fit aria-live="polite">${afAmountHTML(AF)}</div></div>
+    <div class="amtrow"><div class="amt-big disp ${AF.digits ? '' : 'empty'} ${AF.type === 'exp' ? 'exp' : AF.type === 'inc' ? 'inc' : ''}" id="afAmt" data-fit aria-live="polite">${afAmountHTML(AF)}</div></div>
     <div class="hint" id="afHint">${afHint(AF)}</div>
     ${isTr ? html`<div class="lbl" style="font-size:12.5px;margin-top:10px">Qayerdan</div>${accChips('afFrom', AF.accId)}<div class="lbl" style="font-size:12.5px;margin-top:10px">Qayerga</div>${accChips('afTo', AF.toAccId, AF.accId)}`
       : html`<div class="cats">${cats.map(c => html`<button class="${AF.catId === c.id ? 'on' : ''}" data-act="afCat" data-id="${c.id}">${ic(c.icon, 22, 1.5)}<span>${raw(esc(c.name).replace(/\//g, '/<wbr>'))}</span></button>`)}</div>`}
@@ -2371,9 +2589,9 @@ function openDebtForm(opts = {}) {
   const p = d ? personById(d.pid) : opts.pid ? personById(opts.pid) : null;
   const ctx = d ? {
     edit: true, id: d.id, person: p ? p.name : '', phone: p ? p.phone : '', dir: d.dir, amount: grp(d.amount), cur: d.currency, date: d.date, due: d.due || '', note: d.note || '', affects: !!d.affectsBalance, accId: d.accId || defaultAcc(), rate: d.rate ? grp(d.rate) : '',
-  } : { edit: false, person: p ? p.name : '', phone: p ? p.phone : '', dir: 'given', amount: '', cur: 'UZS', date: today(), due: '', note: '', affects: true, accId: defaultAcc(), rate: S.settings.usdRate ? grp(S.settings.usdRate) : '' };
+  } : Object.assign({ edit: false, person: p ? p.name : '', phone: p ? p.phone : '', dir: 'given', amount: '', cur: 'UZS', date: today(), due: '', note: '', affects: true, accId: defaultAcc(), rate: S.settings.usdRate ? grp(S.settings.usdRate) : '' }, opts.prefill || {});
   openLayer({
-    label: 'Qarz', ctx, render: c => html`${sheetHead(c.edit ? 'Qarzni tahrirlash' : 'Qarz yozish')}
+    label: 'Qarz', ctx, render: c => html`${sheetHead(c.edit ? 'Qarzni tahrirlash' : 'Qarz yozish', opts.prefill ? 'AI toʻldirdi — tekshirib, saqlang' : '')}
       <div class="form">
         <div class="seg"><button class="${c.dir === 'given' ? 'on' : ''}" data-act="dfDir" data-d="given">Qarz berdim</button><button class="${c.dir === 'taken' ? 'on' : ''}" data-act="dfDir" data-d="taken">Qarz oldim</button></div>
         <label class="f"><span class="k">Kim</span><input type="text" data-k="person" value="${c.person}" placeholder="Ism" list="peopleList" autocomplete="off" maxlength="40" ${c.edit ? raw('readonly') : ''}>
@@ -2461,8 +2679,8 @@ function loanPreview(c) {
       <div>Birinchi toʻlov sanasi<span class="lead"></span><span class="mono">${dShort(firstDue, true)}</span></div></div>`;
   }
   if (c.type === 'installment') {
-    const T = parseNum(c.total), P = parseNum(c.principal);
-    if (!T || !term) return html`<span class="lbl">Ustama bilan jami narx va muddatni kiriting.</span>`;
+    const T = effTotal(c), P = parseNum(c.principal);
+    if (!T || !term) return html`<span class="lbl">Jami narx (yoki tovar narxi va ustama %) hamda muddatni kiriting.</span>`;
     return html`<div class="dl">
       <div>Oylik toʻlov<span class="lead"></span><span class="mono" style="font-weight:700;font-size:15px">${fmt(Math.round(T / term))}</span></div>
       ${P && P <= T ? html`<div>Ustama<span class="lead"></span><span class="mono">${fmt(T - P)} · ${Math.round((T / P - 1) * 100)}%</span></div>` : ''}
@@ -2472,26 +2690,51 @@ function loanPreview(c) {
   const lim = parseNum(c.limit), used = parseNum(c.used);
   return lim ? html`<div class="dl"><div>Mavjud<span class="lead"></span><span class="mono">${fmt(Math.max(0, lim - used))}</span></div><div>Minimal toʻlov<span class="lead"></span><span class="mono">${fmt(used ? Math.min(used, Math.ceil(used * (parseFloatUz(c.minPct) || 10) / 100 / 1000) * 1000) : 0)}</span></div></div>` : html`<span class="lbl">Limit va ishlatilgan summani kiriting.</span>`;
 }
-function openLoanForm() {
-  const ctx = { type: 'bank', name: '', lender: '', principal: '', rate: '', term: '', scheme: 'annuity', issued: today(), payDay: String(parseD(today()).getDate()), total: '', prepaid: '', limit: '', used: '', minPct: '10', grace: '', cardRate: '' };
+/** nasiya total: typed total, or goods price + markup % */
+function effTotal(c) {
+  const T = parseNum(c.total); if (T) return T;
+  const P = parseNum(c.principal), m = parseFloatUz(c.markup);
+  return P && m > 0 ? Math.round(P * (1 + m / 100)) : 0;
+}
+function loanCtx(l) {
+  const s = l.type === 'card' ? null : calc.loanSummary(l, S.loans.payments);
+  const ownPrice = l.type === 'installment' && l.principal && l.principal !== l.total;
+  return {
+    edit: true, id: l.id, type: l.type, name: l.name || '', lender: l.lender || '',
+    principal: l.type === 'bank' || ownPrice ? grp(l.principal) : '', rate: l.type === 'bank' ? String(l.rate) : '',
+    term: l.term ? String(l.term) : '', scheme: l.scheme || 'annuity', issued: l.issued || today(), payDay: String(l.payDay || ''),
+    total: l.total ? grp(l.total) : '', markup: '', prepaid: s ? String(s.paidCount) : '',
+    limit: l.limit ? grp(l.limit) : '', used: l.used ? grp(l.used) : '', minPct: String(l.minPct || 10), grace: l.grace ? String(l.grace) : '', cardRate: l.type === 'card' && l.rate ? String(l.rate) : '',
+  };
+}
+function openLoanForm(opts = {}) {
+  const l = opts.loan || null;
+  const blank = { edit: false, type: 'bank', name: '', lender: '', principal: '', rate: '', term: '', scheme: 'annuity', issued: today(), payDay: String(parseD(today()).getDate()), total: '', markup: '', prepaid: '', limit: '', used: '', minPct: '10', grace: '', cardRate: '' };
+  const ctx = l ? loanCtx(l) : Object.assign(blank, opts.prefill || {});
+  const real = l && l.type !== 'card' ? S.loans.payments.filter(r => r.loanId === l.id && r.paid && !r.pre && !r.extra).length : 0;
+  const early = l ? S.loans.payments.some(r => r.loanId === l.id && r.extra && !r.card) : false;
   openLayer({
-    label: 'Kredit qoʻshish', ctx,
-    render: c => html`${sheetHead('Kredit qoʻshish')}
+    label: l ? 'Kreditni tahrirlash' : 'Kredit qoʻshish', ctx,
+    render: c => html`${sheetHead(c.edit ? 'Kreditni tahrirlash' : 'Kredit qoʻshish', opts.prefill ? 'AI toʻldirdi — tekshirib, saqlang' : c.edit ? c.name : '')}
       <div class="form">
-        <div class="seg"><button class="${c.type === 'bank' ? 'on' : ''}" data-act="lfType" data-t="bank">Bank krediti</button><button class="${c.type === 'installment' ? 'on' : ''}" data-act="lfType" data-t="installment">Nasiya</button><button class="${c.type === 'card' ? 'on' : ''}" data-act="lfType" data-t="card">Kredit karta</button></div>
+        ${c.edit ? html`<div class="lbl" style="font-size:13.5px">Turi: <b style="color:var(--ink);font-weight:600">${TYPE_NAME[c.type]}</b> · turini oʻzgartirib boʻlmaydi</div>`
+          : html`<div class="seg"><button class="${c.type === 'bank' ? 'on' : ''}" data-act="lfType" data-t="bank">Bank krediti</button><button class="${c.type === 'installment' ? 'on' : ''}" data-act="lfType" data-t="installment">Nasiya</button><button class="${c.type === 'card' ? 'on' : ''}" data-act="lfType" data-t="card">Kredit karta</button></div>`}
+        ${early ? html`<div class="box warn" style="font-size:13.5px">Bu kreditda muddatidan oldin toʻlov bor. Summa, foiz va muddatni oʻzgartirish uchun avval jadvaldan oʻsha toʻlovni bekor qiling. Nom va bankni oʻzgartirish mumkin.</div>` : ''}
         <div class="frow">
           <label class="f"><span class="k">Nomi</span><input type="text" data-k="name" value="${c.name}" placeholder="${c.type === 'bank' ? 'Avtokredit' : c.type === 'installment' ? 'Telefon' : 'Humo kredit karta'}" maxlength="40"></label>
           <label class="f"><span class="k">${c.type === 'installment' ? 'Doʻkon / xizmat' : 'Bank'}</span><input type="text" data-k="lender" value="${c.lender}" placeholder="${c.type === 'installment' ? 'Uzum Nasiya' : 'Kapitalbank'}" maxlength="40"></label>
         </div>
         ${c.type === 'bank' ? html`
-          <div class="seg"><button class="${c.scheme === 'annuity' ? 'on' : ''}" data-act="lfScheme" data-s="annuity">Annuitet</button><button class="${c.scheme === 'diff' ? 'on' : ''}" data-act="lfScheme" data-s="diff">Differensial</button></div>
+          <div class="f"><span class="k">Toʻlov sxemasi</span><div class="seg"><button class="${c.scheme === 'annuity' ? 'on' : ''}" data-act="lfScheme" data-s="annuity">Annuitet</button><button class="${c.scheme === 'diff' ? 'on' : ''}" data-act="lfScheme" data-s="diff">Differensial</button></div>
+          <div class="help">${SCHEME_HELP[c.scheme]} <button type="button" class="lnk" data-act="schemeInfo" data-id="${c.edit ? c.id : ''}">Farqi nima?</button></div></div>
           <label class="f"><span class="k">Kredit summasi, soʻm</span><input class="num" inputmode="numeric" data-k="principal" data-type="num" value="${c.principal}" placeholder="30 000 000"></label>
           <div class="frow"><label class="f"><span class="k">Yillik foiz, %</span><input class="num" inputmode="decimal" data-k="rate" value="${c.rate}" placeholder="24"></label>
           <label class="f"><span class="k">Muddat, oy</span><input class="num" inputmode="numeric" data-k="term" data-type="num" value="${c.term}" placeholder="36"></label></div>`
         : c.type === 'installment' ? html`
-          <label class="f"><span class="k">Ustama bilan jami narx, soʻm</span><input class="num" inputmode="numeric" data-k="total" data-type="num" value="${c.total}" placeholder="7 560 000"><div class="help">Nasiyada foiz emas, shartnomadagi jami narx kiritiladi.</div></label>
-          <div class="frow"><label class="f"><span class="k">Tovar narxi (ixtiyoriy)</span><input class="num" inputmode="numeric" data-k="principal" data-type="num" value="${c.principal}" placeholder="6 000 000"></label>
-          <label class="f"><span class="k">Muddat, oy</span><input class="num" inputmode="numeric" data-k="term" data-type="num" value="${c.term}" placeholder="12"></label></div>`
+          <label class="f"><span class="k">Ustama bilan jami narx, soʻm</span><input class="num" inputmode="numeric" data-k="total" data-type="num" value="${c.total}" placeholder="7 560 000"><div class="help">Nasiyada foiz emas, shartnomadagi jami narx kiritiladi. Bilmasangiz, pastda tovar narxi va ustama foizini yozing.</div></label>
+          <div class="frow"><label class="f"><span class="k">Tovar narxi</span><input class="num" inputmode="numeric" data-k="principal" data-type="num" value="${c.principal}" placeholder="6 000 000"></label>
+          <label class="f"><span class="k">Ustama, %</span><input class="num" inputmode="decimal" data-k="markup" value="${c.markup}" placeholder="26"></label></div>
+          <label class="f"><span class="k">Muddat, oy</span><input class="num" inputmode="numeric" data-k="term" data-type="num" value="${c.term}" placeholder="12"></label>`
         : html`
           <div class="frow"><label class="f"><span class="k">Limit, soʻm</span><input class="num" inputmode="numeric" data-k="limit" data-type="num" value="${c.limit}" placeholder="10 000 000"></label>
           <label class="f"><span class="k">Hozir ishlatilgan</span><input class="num" inputmode="numeric" data-k="used" data-type="num" value="${c.used}" placeholder="0"></label></div>
@@ -2502,10 +2745,12 @@ function openLoanForm() {
           ${c.type === 'card' ? '' : html`<label class="f"><span class="k">Olingan sana</span><input type="date" data-k="issued" value="${c.issued}"></label>`}
           <label class="f"><span class="k">Toʻlov kuni (oyning)</span><input class="num" inputmode="numeric" data-k="payDay" data-type="num" value="${c.payDay}" placeholder="20"></label>
         </div>
-        ${c.type === 'card' ? '' : html`<label class="f"><span class="k">Ilovadan oldin toʻlangan oylar</span><input class="num" inputmode="numeric" data-k="prepaid" data-type="num" value="${c.prepaid}" placeholder="0"><div class="help">Eski kredit boʻlsa — shuncha toʻlov “toʻlangan” deb belgilanadi (chiqim yozilmaydi).</div></label>`}
+        ${c.type === 'card' ? '' : html`<label class="f"><span class="k">${c.edit ? 'Toʻlangan oylar' : 'Ilovadan oldin toʻlangan oylar'}</span><input class="num" inputmode="numeric" data-k="prepaid" data-type="num" value="${c.prepaid}" placeholder="0"><div class="help">${c.edit ? `Ilovada yozilgan toʻlovlar: ${real} ta. Koʻproq yozsangiz, ortigʻi “ilovadan oldin toʻlangan” deb belgilanadi (chiqim yozilmaydi).` : 'Eski kredit boʻlsa — shuncha toʻlov “toʻlangan” deb belgilanadi (chiqim yozilmaydi).'}</div></label>`}
         <div id="lfPrev" class="box">${loanPreview(c)}</div>
       </div>
-      <button class="btn pri" data-act="lfSave" style="margin-top:20px">Saqlash</button>`,
+      <button class="btn pri" data-act="lfSave" style="margin-top:20px">${c.edit ? 'Oʻzgarishlarni saqlash' : 'Saqlash'}</button>
+      ${c.edit ? html`<button class="btn dngb sm" data-act="lmDelete" style="margin-top:10px">${ic('trash', 18, 1.6)}Kreditni oʻchirish</button>
+        <p class="lbl" style="font-size:12.5px;margin-top:8px">Oʻchirilganda qilingan toʻlovlar chiqim sifatida tarixda qoladi.</p>` : ''}`,
     onInput: (k, el, L) => L.part('#lfPrev', loanPreview(L.ctx)),
   });
 }
@@ -2577,6 +2822,272 @@ function openAmountSheet({ title, sub, value, label, help, onSave, extra, max })
 /* =====================================================================
    16. SHEETS — settings, export/import
    ===================================================================== */
+/* =====================================================================
+   15b. AI — a sentence in, a filled loan / debt form out.
+   Engine 1 (always on): a small offline Uzbek parser.
+   Engine 2 (only when the user saved their own Anthropic API key on this device): Claude with a JSON schema.
+   Either way the result only pre-fills a form; nothing is saved until the user taps “Saqlash”.
+   ===================================================================== */
+const AI_LS = 'xarajat.aiKey';
+const aiKey = () => { try { return localStorage.getItem(AI_LS) || ''; } catch (e) { return ''; } };
+const AI_MODEL = 'claude-opus-5-5';
+const MONTHS_UZ = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const AI_EXAMPLES = [
+  'Uzum nasiyadan 12 oyga 49% ustama bilan telefon oldim, narxi 6 mln. 3 oyi toʻlangan, toʻlov 15-sanada',
+  'TBC bankdan 15 mln kredit, 46% yillik, 14 oyga, annuitet, 6 oyi toʻlangan, har oy 16-sanada',
+  'Aliga 2 mln qarz berdim, 1-dekabrgacha qaytaradi',
+  'Humo kredit karta limiti 10 mln, 3,4 mln ishlatilgan, toʻlov 20-sanada',
+];
+const AI_FIELDS = ['kind', 'loanType', 'name', 'lender', 'person', 'dir', 'amount', 'total', 'markupPct', 'ratePct', 'termMonths', 'scheme', 'paidMonths', 'payDay', 'issued', 'limit', 'used', 'currency', 'due', 'note'];
+const blankAi = () => Object.fromEntries(AI_FIELDS.map(k => [k, null]));
+const nullable = s => ({ anyOf: [s, { type: 'null' }] });
+const AI_SCHEMA = {
+  type: 'object', additionalProperties: false, required: AI_FIELDS,
+  properties: {
+    kind: { type: 'string', enum: ['loan', 'debt', 'unknown'] },
+    loanType: nullable({ type: 'string', enum: ['bank', 'installment', 'card'] }),
+    name: nullable({ type: 'string' }), lender: nullable({ type: 'string' }), person: nullable({ type: 'string' }),
+    dir: nullable({ type: 'string', enum: ['given', 'taken'] }),
+    amount: nullable({ type: 'integer' }), total: nullable({ type: 'integer' }),
+    markupPct: nullable({ type: 'number' }), ratePct: nullable({ type: 'number' }),
+    termMonths: nullable({ type: 'integer' }), scheme: nullable({ type: 'string', enum: ['annuity', 'diff'] }),
+    paidMonths: nullable({ type: 'integer' }), payDay: nullable({ type: 'integer' }),
+    issued: nullable({ type: 'string', format: 'date' }),
+    limit: nullable({ type: 'integer' }), used: nullable({ type: 'integer' }),
+    currency: nullable({ type: 'string', enum: ['UZS', 'USD'] }),
+    due: nullable({ type: 'string', format: 'date' }), note: nullable({ type: 'string' }),
+  },
+};
+const aiSystem = () => `You read one short note, usually in Uzbek (Latin or Cyrillic, sometimes Russian), from the user of a personal finance notebook app, and extract a single loan or personal debt as JSON. Today is ${today()}.
+- kind: "loan" for bank credit, nasiya (instalment purchase) or credit card; "debt" for money lent to or borrowed from a person; "unknown" if it is neither.
+- loanType: "installment" for nasiya / muddatli toʻlov / rassrochka (Uzum Nasiya, Alif Nasiya, shop instalments); "card" for kredit karta or a revolving card limit; otherwise "bank".
+- For nasiya the percent is the total markup (ustama) for the whole term: put it in markupPct, not ratePct. For bank loans and cards the percent is yearly: ratePct.
+- amount: loan principal / goods price / debt amount in whole units of currency. total: nasiya price including markup, only if stated. limit and used: credit card limit and current balance.
+- mln = million, mlrd = billion, ming = thousand. Never invent amounts or dates; use null when the note does not say.
+- paidMonths: instalments already paid ("3 oyi toʻlangan"). payDay: day of month of the payment ("15-sanada"). termMonths: total term in months (years × 12).
+- issued and due: ISO dates (YYYY-MM-DD) only if stated or clearly implied; "1-dekabrgacha" means due on the next 1 December.
+- dir: "given" when the user lent money (berdim, menga qarzdor), "taken" when the user borrowed (oldim, qarzdorman). person: the other person's name without suffixes (-ga, -dan, -ning).
+- name: short label, e.g. the item bought on nasiya ("Telefon") or the loan purpose ("Avtokredit"). lender: bank or shop, properly capitalised ("Uzum Nasiya", "TBC Bank").
+- note: one short sentence in Uzbek (Latin) about anything ambiguous or missing that the user should check, else null.`;
+
+async function aiClaude(text, key) {
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = ctl ? setTimeout(() => ctl.abort(), 60000) : null;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST', signal: ctl ? ctl.signal : undefined,
+      headers: {
+        'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2026-10-21',
+        'anthropic-beta': 'server-side-fallback-2026-07-01', 'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: AI_MODEL, max_tokens: 16000, fallbacks: 'default',
+        output_config: { effort: 'low', format: { type: 'json_schema', schema: AI_SCHEMA } },
+        system: aiSystem(), messages: [{ role: 'user', content: text.slice(0, 2000) }],
+      }),
+    });
+    if (!r.ok) {
+      let msg = 'HTTP ' + r.status;
+      try { const j = await r.json(); if (j && j.error && j.error.message) msg = j.error.message; } catch (e) { }
+      throw new Error(r.status === 401 ? 'API kaliti notoʻgʻri' : r.status === 429 ? 'Soʻrov koʻp — birozdan keyin urinib koʻring' : r.status >= 500 ? 'Anthropic serveri javob bermadi' : msg);
+    }
+    const j = await r.json();
+    if (j.stop_reason === 'refusal') throw new Error('AI bu matnni qayta ishlamadi');
+    if (j.stop_reason === 'max_tokens') throw new Error('AI javobi chala qoldi');
+    const tb = (j.content || []).find(b => b.type === 'text');
+    if (!tb) throw new Error('AI boʻsh javob qaytardi');
+    return aiClean(JSON.parse(tb.text));
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw new Error('AI javobi juda kechikdi');
+    if (e instanceof TypeError) throw new Error('Internetga ulanib boʻlmadi');
+    throw e;
+  } finally { if (timer) clearTimeout(timer); }
+}
+
+/** keep only sane values, whatever the engine returned */
+function aiClean(o) {
+  const r = blankAi(); o = o || {};
+  const int = (v, lo, hi) => { if (v == null || v === '') return null; const n = Math.round(Number(v)); return Number.isFinite(n) && n >= lo && n <= hi ? n : null; };
+  const num = (v, lo, hi) => { if (v == null || v === '') return null; const n = Number(v); return Number.isFinite(n) && n >= lo && n <= hi ? Math.round(n * 100) / 100 : null; };
+  const str = (v, n = 40) => typeof v === 'string' && v.trim() ? v.trim().replace(/\s+/g, ' ').slice(0, n) : null;
+  const date = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(parseD(v)) ? v : null;
+  r.kind = ['loan', 'debt'].includes(o.kind) ? o.kind : 'unknown';
+  r.loanType = ['bank', 'installment', 'card'].includes(o.loanType) ? o.loanType : null;
+  r.name = str(o.name); r.lender = str(o.lender); r.person = str(o.person);
+  r.dir = ['given', 'taken'].includes(o.dir) ? o.dir : null;
+  r.amount = int(o.amount, 1, 1e13); r.total = int(o.total, 1, 1e13); r.limit = int(o.limit, 1, 1e13); r.used = int(o.used, 0, 1e13);
+  r.markupPct = num(o.markupPct, 0, 500); r.ratePct = num(o.ratePct, 0, 200);
+  r.termMonths = int(o.termMonths, 1, 600); r.paidMonths = int(o.paidMonths, 0, 600); r.payDay = int(o.payDay, 1, 31);
+  r.scheme = ['annuity', 'diff'].includes(o.scheme) ? o.scheme : null;
+  r.currency = o.currency === 'USD' ? 'USD' : o.currency === 'UZS' ? 'UZS' : null;
+  r.issued = date(o.issued); r.due = date(o.due); r.note = str(o.note, 200);
+  if (r.kind === 'loan' && !r.loanType) r.loanType = 'bank';
+  return r;
+}
+
+/* ---------- offline parser ---------- */
+const LENDERS = [
+  ['uzum nasiya', 'Uzum Nasiya'], ['uzum', 'Uzum Nasiya'], ['alif nasiya', 'Alif Nasiya'], ['alif', 'Alif'], ['anor ?bank', 'Anorbank'], ['tbc', 'TBC Bank'],
+  ['kapital ?bank', 'Kapitalbank'], ['hamkor ?bank', 'Hamkorbank'], ['ipoteka ?bank', 'Ipoteka-bank'], ['xalq bank', 'Xalq banki'], ['agro ?bank', 'Agrobank'],
+  ['asaka ?bank', 'Asakabank'], ['nbu', 'NBU'], ['milliy bank', 'Milliy bank'], ['sqb', 'SQB'], ['davr ?bank', 'Davr bank'], ['infin ?bank', 'Infinbank'],
+  ['trast ?bank', 'Trastbank'], ["ipak yo'li", "Ipak yoʻli bank"], ['aloqa ?bank', 'Aloqabank'], ['mikrokredit ?bank', 'Mikrokreditbank'], ['turon ?bank', 'Turonbank'],
+  ['universal ?bank', 'Universal bank'], ['octo ?bank', 'Octobank'], ['poytaxt ?bank', 'Poytaxt bank'], ['hayot ?bank', 'Hayot bank'], ['garant ?bank', 'Garant bank'],
+  ['tenge ?bank', 'Tenge bank'], ['kdb', 'KDB bank'], ['ziraat', 'Ziraat bank'], ['orient finans', 'Orient Finans'], ['apex ?bank', 'Apex bank'], ['smart ?bank', 'Smartbank'],
+  ['open ?bank', 'Openbank'], ['yangi bank', 'Yangi bank'], ['madad', 'Madad Invest'], ['texnomart', 'Texnomart'], ['mediapark', 'Mediapark'], ['idea', 'Idea'],
+  ['artel', 'Artel'], ['olcha', 'Olcha'], ['imkon', 'Imkon'], ['paylater', 'PayLater'], ['humo', 'Humo'], ['uzcard', 'Uzcard'], ['click', 'Click'], ['payme', 'Payme'],
+];
+const ITEMS = [['iphone', 'iPhone'], ['telefon', 'Telefon'], ['samsung', 'Samsung'], ['noutbuk', 'Noutbuk'], ['kompyuter', 'Kompyuter'], ['televizor', 'Televizor'],
+  ['muzlatgich', 'Muzlatgich'], ['kir yuvish', 'Kir yuvish mashinasi'], ['konditsioner', 'Konditsioner'], ['mebel', 'Mebel'], ['divan', 'Divan'], ['velosiped', 'Velosiped'],
+  ['avtokredit', 'Avtokredit'], ['avto', 'Avtokredit'], ['mashina', 'Mashina'], ['ipoteka', 'Ipoteka'], ["ta'lim", 'Taʼlim krediti'], ['mikroqarz', 'Mikroqarz'], ["iste'mol", 'Isteʼmol krediti']];
+const CYR = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'yo', ж: 'j', з: 'z', и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'x', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sh', ъ: "'", ы: 'i', ь: '', э: 'e', ю: 'yu', я: 'ya', ў: "o'", қ: 'q', ғ: "g'", ҳ: 'h' };
+const deCyr = s => s.replace(/[а-яёўқғҳ]/gi, ch => { const l = ch.toLowerCase(), v = CYR[l]; if (v == null) return ch; return ch === l ? v : v.charAt(0).toUpperCase() + v.slice(1); });
+/** “1,5 mln” → 1500000, “500 ming” → 500000, “15 000 000” → 15000000 */
+function moneyVal(numTxt, unit) {
+  let s = numTxt.replace(/\s/g, '');
+  const mult = /^(mlrd|milliard)/.test(unit || '') ? 1e9 : /^(mln|million|milyon)/.test(unit || '') ? 1e6 : /^(ming|k$)/.test(unit || '') ? 1e3 : 1;
+  if (mult > 1) s = s.replace(',', '.'); else s = s.replace(/[.,](?=\d{3}(\D|$))/g, '').replace(',', '.');
+  const v = parseFloat(s);
+  return Number.isFinite(v) ? Math.round(v * mult) : null;
+}
+function nextDayOf(day, from = today()) { // first date ≥ from that falls on `day` of a month
+  let d = addMonths(from.slice(0, 8) + '01', 0, day);
+  if (d < from) d = addMonths(from.slice(0, 8) + '01', 1, day);
+  return d;
+}
+function aiLocalParse(text) {
+  const r = blankAi();
+  const raw = deCyr(normApos(String(text || ''))).replace(/\s+/g, ' ').trim();
+  let t = ' ' + raw.toLowerCase() + ' ';
+  const cut = re => { const m = re.exec(t); if (m) t = t.slice(0, m.index) + ' '.repeat(m[0].length) + t.slice(m.index + m[0].length); return m; };
+  const strongLoan = /kredit|nasiya|ipoteka|mikroqarz|rassrochka|muddatli to'lov|bo'lib to'la/.test(t), weakLoan = /bank|karta|limit/.test(t);
+  const debtWords = /qarz(ga)? ?(berdim|oldim|berib|olib)|qarzdor|berdim|oldim|qaytar/.test(t);
+  r.kind = strongLoan ? 'loan' : debtWords ? 'debt' : weakLoan ? 'loan' : 'unknown';
+  if (/\$|dollar|usd/.test(t)) r.currency = 'USD';
+  // paid months before the term so “3 oyi toʻlangan” is not read as the term
+  let m = cut(/(\d+)\s*(?:ta\s*)?oy(?:i|ini|ni|lik)?\s*(?:to'langan|to'ladim|to'lab bo'ldim|to'lab qo'ydim|to'landi|yopilgan|yopdim)/) || cut(/(?:to'langan|to'ladim)\s*(\d+)\s*oy/);
+  if (m) r.paidMonths = +m[1];
+  if ((m = cut(/(\d{1,2})\s*-?\s*(?:sana|sanasi|sanada|chisla|chislo|kuni)\b/)) || (m = cut(/har oy(?:ning)?\s*(\d{1,2})\s*-?\s*(?:da|sida|ida|kuni)?\b/))) r.payDay = +m[1];
+  if ((m = cut(/(\d+(?:[.,]\d+)?)\s*(?:%|foiz)/))) { const v = parseFloat(m[1].replace(',', '.')); r.ratePct = v; }
+  if ((m = cut(/(\d+)\s*(?:oy|oyga|oylik|oyda|oyli)\b/))) r.termMonths = +m[1];
+  else if ((m = cut(/(\d+(?:[.,]5)?)\s*(?:yil|yilga|yillik|yilda)\b/))) r.termMonths = Math.round(parseFloat(m[1].replace(',', '.')) * 12);
+  // dates like “1-dekabr”, “1-dekabrgacha”, “dekabr oxirigacha”
+  const mon = MONTHS_UZ.join('|');
+  if ((m = cut(new RegExp(`(\\d{1,2})\\s*-?\\s*(${mon})[a-z']*`)))) {
+    const day = +m[1], mi = MONTHS_UZ.indexOf(m[2]) + 1; let y = +today().slice(0, 4);
+    let d = `${y}-${pad(mi)}-${pad(Math.min(day, daysInMonth(y, mi)))}`;
+    const isIssue = /olingan|olgan|oldim|berganman|berdim/.test(m[0] + t.slice(m.index + m[0].length, m.index + m[0].length + 14)) && !/gacha/.test(m[0]);
+    if (!isIssue && d < today()) { y++; d = `${y}-${pad(mi)}-${pad(Math.min(day, daysInMonth(y, mi)))}`; }
+    if (isIssue && d > today()) { y--; d = `${y}-${pad(mi)}-${pad(Math.min(day, daysInMonth(y, mi)))}`; }
+    if (isIssue) r.issued = d; else r.due = d;
+  }
+  if ((m = cut(/(\d+)\s*(kun|hafta|oy)\s*(?:da|dan keyin|ichida)\s*qaytar/))) r.due = m[2] === 'oy' ? addMonths(today(), +m[1], parseD(today()).getDate()) : addDays(today(), +m[1] * (m[2] === 'hafta' ? 7 : 1));
+  // money: numbers with a unit, or big bare numbers; tag by the word in front of them
+  const MONEY = /(\$\s*)?(\d+(?:[ .,]\d{3})*(?:[.,]\d+)?)\s*(mlrd|milliard|mln|million|milyon|ming|k\b)?\s*(so'm|som|sum|dollar|usd|\$)?/g;
+  const found = [];
+  while ((m = MONEY.exec(t))) {
+    if (!m[2]) continue;
+    const unit = m[3] || '', cur = m[1] || m[4] || '';
+    const v = moneyVal(m[2], unit);
+    if (v == null || (!unit && !cur && v < 1000)) continue;
+    const before = t.slice(Math.max(0, m.index - 28), m.index);
+    found.push({ v, before });
+  }
+  for (const f of found) {
+    const b = f.before;
+    if (/limit\w*\s*$|limiti?\s*$/.test(b)) r.limit = f.v;
+    else if (/ishlat\w*\s*$|qarzim\s*$|qoldiq\w*\s*$/.test(b)) r.used = f.v;
+    else if (/jami\w*\s*$|ustama bilan\s*$/.test(b)) r.total = f.v;
+    else if (r.amount == null) r.amount = f.v;
+    else if (r.used == null && /karta/.test(t)) r.used = f.v;
+  }
+  // a number right after “ishlatilgan” style words but written after the number (“3,4 mln ishlatilgan”)
+  if (/karta|limit/.test(t) && r.limit == null && found.length) {
+    const lm = /limit\w*\s*(\d+(?:[.,]\d+)?)\s*(mlrd|mln|million|ming)?/.exec(' ' + raw.toLowerCase());
+    if (lm) r.limit = moneyVal(lm[1], lm[2] || '');
+  }
+  if (/karta|limit/.test(t) && r.used == null) {
+    const um = /(\d+(?:[.,]\d+)?)\s*(mlrd|mln|million|ming)?\s*(?:so'm\s*)?ishlat/.exec(' ' + raw.toLowerCase());
+    if (um) r.used = moneyVal(um[1], um[2] || '');
+  }
+  if (r.kind === 'loan') {
+    const lt = ' ' + raw.toLowerCase() + ' ';
+    r.loanType = /nasiya|rassrochka|muddatli to'lov|bo'lib to'la/.test(lt) ? 'installment' : /kredit kart|karta/.test(lt) ? 'card' : 'bank';
+    if (/differensial|kamayib bor/.test(lt)) r.scheme = 'diff'; else if (/annuitet|bir xil|teng to'lov/.test(lt)) r.scheme = 'annuity';
+    for (const [re, nm] of LENDERS) if (new RegExp(`(^|[^a-z])${re}`).test(lt)) { r.lender = nm; break; }
+    if (!r.lender) { const bm = /([a-z']{3,})\s*bank/.exec(lt); if (bm && !/kredit|qaysi|bu|shu/.test(bm[1])) r.lender = bm[1].charAt(0).toUpperCase() + bm[1].slice(1) + ' bank'; }
+    for (const [re, nm] of ITEMS) if (new RegExp(`(^|[^a-z])${re}`).test(lt)) { r.name = nm; break; }
+    if (r.loanType === 'installment') { r.markupPct = r.ratePct; r.ratePct = null; }
+    if (r.loanType === 'card' && r.limit == null && r.amount != null) { r.limit = r.amount; r.amount = null; }
+  } else if (r.kind === 'debt') {
+    const lt = raw.toLowerCase();
+    r.dir = /qarzdorman|oldim|qarz oldim|qarzga oldim|olib turdim/.test(lt) && !/menga qarzdor|berdim/.test(lt) ? 'taken' : 'given';
+    // the person: a capitalised word (not the first word “Men”), suffixes stripped
+    const words = raw.split(/[\s,.;:!?]+/).filter(Boolean);
+    const skip = /^(men|menga|mendan|meni|u|unga|undan|bugun|kecha|ertaga|qarz|har|toʻlov|to'lov)$/i;
+    let cand = words.find((w, i) => /^[A-Z][a-z'ʻ]+/.test(w) && !skip.test(w) && !(i === 0 && /^(men|bugun|kecha)$/i.test(w)));
+    if (!cand) { const gm = /([a-z'ʻ]{2,}?)(?:ga|ka|qa|dan|ning)\s+\S*\s*(?:\S+\s+)?(?:qarz|berdim|oldim)/.exec(lt); if (gm && !skip.test(gm[1])) cand = gm[1]; }
+    if (cand) { let p = cand.replace(/(ning|dan|ga|ka|qa|ni|da)$/i, ''); if (p.length < 2) p = cand; r.person = p.charAt(0).toUpperCase() + p.slice(1); }
+  }
+  // issue date from paid months + pay day when it was not stated
+  if (r.kind === 'loan' && r.loanType !== 'card' && !r.issued && r.paidMonths != null && r.payDay) {
+    const firstDue = addMonths(nextDayOf(r.payDay), -r.paidMonths, r.payDay);
+    r.issued = addMonths(firstDue, -1, r.payDay);
+  }
+  const miss = [];
+  if (r.kind === 'loan' && r.loanType === 'installment' && !r.amount && !r.total) miss.push('tovar narxi yoki jami narx');
+  if (r.kind === 'loan' && r.loanType === 'bank' && !r.amount) miss.push('kredit summasi');
+  if (r.kind === 'loan' && r.loanType !== 'card' && !r.termMonths) miss.push('muddat');
+  if (r.kind === 'debt' && !r.amount) miss.push('summa');
+  if (r.kind === 'debt' && !r.person) miss.push('kim');
+  r.note = miss.length ? `Matnda yoʻq: ${miss.join(', ')} — formada kiriting.` : null;
+  return aiClean(r);
+}
+
+/* ---------- result → form ---------- */
+function aiLoanPrefill(a) {
+  const p = { type: a.loanType || 'bank', name: a.name || '', lender: a.lender || '' };
+  if (p.type === 'card') return Object.assign(p, { limit: a.limit ? grp(a.limit) : '', used: a.used != null ? grp(a.used) : '', cardRate: a.ratePct != null ? String(a.ratePct) : '', payDay: a.payDay ? String(a.payDay) : '' });
+  Object.assign(p, { term: a.termMonths ? String(a.termMonths) : '', prepaid: a.paidMonths ? String(a.paidMonths) : '', payDay: a.payDay ? String(a.payDay) : String(parseD(a.issued || today()).getDate()), issued: a.issued || today() });
+  if (p.type === 'installment') Object.assign(p, { principal: a.amount ? grp(a.amount) : '', total: a.total ? grp(a.total) : '', markup: a.markupPct != null ? String(a.markupPct) : '' });
+  else Object.assign(p, { principal: a.amount ? grp(a.amount) : '', rate: a.ratePct != null ? String(a.ratePct) : '', scheme: a.scheme || 'annuity' });
+  if (!p.name) p.name = p.type === 'installment' ? 'Nasiya' : a.lender ? `${a.lender} krediti` : 'Bank krediti';
+  return p;
+}
+function aiDebtPrefill(a) {
+  return { dir: a.dir || 'given', person: a.person || '', amount: a.amount ? grp(a.amount) : '', cur: a.currency === 'USD' ? 'USD' : 'UZS', due: a.due || '', date: a.issued && a.issued <= today() ? a.issued : today(), note: '' };
+}
+function aiSummary(a) {
+  const L = (k, v) => html`<div class="ailine ${v == null || v === '' ? 'miss' : ''}"><span class="k">${k}</span><span class="v">${v == null || v === '' ? 'yoʻq — formada kiritasiz' : v}</span></div>`;
+  const sm = v => v == null ? null : money(v, a.currency === 'USD' ? 'USD' : 'UZS') + (a.currency === 'USD' ? '' : ' soʻm');
+  if (a.kind === 'loan') {
+    const t = a.loanType;
+    return html`${L('Turi', TYPE_NAME[t])}${L(t === 'installment' ? 'Doʻkon' : 'Bank', a.lender)}${t !== 'card' ? L('Nomi', a.name) : ''}
+      ${t === 'card' ? html`${L('Limit', sm(a.limit))}${L('Ishlatilgan', sm(a.used))}${L('Yillik foiz', a.ratePct != null ? a.ratePct + '%' : null)}`
+        : t === 'installment' ? html`${L('Tovar narxi', sm(a.amount))}${a.total ? L('Jami narx', sm(a.total)) : L('Ustama', a.markupPct != null ? a.markupPct + '%' : null)}${L('Muddat', a.termMonths ? a.termMonths + ' oy' : null)}`
+        : html`${L('Summa', sm(a.amount))}${L('Yillik foiz', a.ratePct != null ? a.ratePct + '%' : null)}${L('Muddat', a.termMonths ? a.termMonths + ' oy' : null)}${L('Sxema', a.scheme ? SCHEME_NAME[a.scheme] : 'Annuitet (taxmin)')}`}
+      ${t !== 'card' ? L('Toʻlangan', a.paidMonths ? a.paidMonths + ' oy' : null) : ''}${L('Toʻlov kuni', a.payDay ? a.payDay + '-sana' : null)}${t !== 'card' && a.issued ? L('Olingan', dMid(a.issued)) : ''}`;
+  }
+  return html`${L('Turi', a.dir === 'taken' ? 'Qarz oldim' : 'Qarz berdim')}${L('Kim', a.person)}${L('Summa', sm(a.amount))}${L('Qaytarish muddati', a.due ? dMid(a.due) : null)}`;
+}
+function openAiSheet(hint) {
+  const ex = hint === 'debt' ? [AI_EXAMPLES[2], AI_EXAMPLES[0]] : [AI_EXAMPLES[0], AI_EXAMPLES[1], AI_EXAMPLES[3]];
+  openLayer({
+    label: 'AI yordamchi', ctx: { text: '', busy: false, res: null, err: '', engine: '' },
+    render: c => html`${sheetHead(html`<span class="aitag">${ic('spark', 15, 1.6)}AI yordamchi</span>`, 'Oddiy soʻz bilan yozing — formani oʻzim toʻldiraman')}
+      <div class="form">
+        <label class="f"><span class="k">Kredit yoki qarz haqida</span><textarea data-k="text" rows="4" maxlength="600" placeholder="Masalan: ${AI_EXAMPLES[0]}">${c.text}</textarea></label>
+        <div class="f"><span class="k">Namuna bilan sinab koʻring</span><div class="chips">${ex.map((e, i) => html`<button class="chip" data-act="aiEx" data-i="${AI_EXAMPLES.indexOf(e)}" style="text-align:left;white-space:normal;line-height:1.3;border-radius:12px;padding-top:7px;padding-bottom:7px">${e.length > 54 ? e.slice(0, 52) + '…' : e}</button>`)}</div></div>
+      </div>
+      <button class="btn pri aibtn" data-act="aiGo" style="margin-top:16px" ${c.busy ? raw('aria-disabled="true"') : ''}>${ic('spark', 19, 1.7)}${c.busy ? 'Oʻqiyapman…' : 'Tushunib olish'}</button>
+      <div id="aiOut" style="margin-top:14px">${c.err ? html`<div class="box warn" style="font-size:13.5px">${c.err}</div>` : ''}${c.res ? (c.res.kind === 'unknown'
+        ? html`<div class="box warn" style="font-size:13.5px">Tushunolmadim. Kredit, nasiya, kredit karta yoki kimgadir bergan/olgan qarzingiz haqida yozing.</div>`
+        : html`<div class="sechead" style="margin-top:6px"><h2 style="font-size:20px">Tushunganim</h2><span class="lbl" style="font-size:12px">${c.engine}</span></div>
+          <div style="border-top:1px solid var(--ink);margin-top:8px">${aiSummary(c.res)}</div>
+          ${c.res.note ? html`<p class="lbl" style="font-size:13px;margin-top:8px">${c.res.note}</p>` : ''}
+          <button class="btn pri" data-act="aiApply" style="margin-top:14px">Formani ochish ${ic('chevR', 18, 2)}</button>`) : ''}</div>
+      <p class="lbl" style="font-size:12px;margin-top:14px">${aiKey() ? 'Claude AI orqali tahlil qilinadi. Natija faqat formani toʻldiradi — saqlashdan oldin tekshirasiz.' : html`Hozir ichki tahlilchi ishlayapti (internetsiz). Murakkab matnlar uchun Sozlamalarda Claude kalitini qoʻshish mumkin.`}</p>`,
+  });
+}
 function openAccForm(id) {
   const a = id ? accById(id) : null;
   const used = id ? accountUsed(id) : false;
@@ -2691,8 +3202,10 @@ async function doImport(text) {
   const ok = await confirmDlg({ title: 'Maʼlumotlarni almashtiramizmi?', text: 'Hozirgi hisoblar, yozuvlar, qarzlar va kreditlar zaxiradagisi bilan almashtiriladi.', ok: 'Tiklash', danger: true });
   if (!ok) return;
   const oldIds = new Set([...localDocIds(), ...Object.keys(Sync.remote)]);
+  const keepName = (S.settings && S.settings.name) || (OB.uname || '').trim();
   S = emptyState();
-  S.settings = Object.assign(defaultSettings(), o.settings, { onboarded: true });
+  S.settings = Object.assign(defaultSettings(), o.settings, { onboarded: true, welcomed: true });
+  if (!S.settings.name && keepName) S.settings.name = keepName;
   if (o.debts) S.debts = o.debts;
   if (o.loans) S.loans = o.loans;
   S.months = {};
@@ -2954,7 +3467,7 @@ const ACT = {
   lfType: (el, L) => { L.ctx.type = el.dataset.t; L.rerender(); },
   lfScheme: (el, L) => { L.ctx.scheme = el.dataset.s; L.rerender(); },
   lfSave: (el, L) => {
-    const c = L.ctx, id = newId('l');
+    const c = L.ctx, id = c.edit ? c.id : newId('l');
     const payDay = Math.min(31, Math.max(1, parseNum(c.payDay) || parseD(c.issued || today()).getDate()));
     const term = parseNum(c.term);
     let loan;
@@ -2971,11 +3484,19 @@ const ACT = {
         if (r < 0 || r > 200) { warn('Foizni tekshiring'); return; }
         loan = { id, type: 'bank', scheme: c.scheme, name: c.name.trim() || 'Bank krediti', lender: c.lender.trim(), principal: P, rate: r, term, issued, payDay, firstDue: addMonths(issued, 1, payDay), status: 'active', createdAt: Date.now() };
       } else {
-        const T = parseNum(c.total), P = parseNum(c.principal);
-        if (!T) { warn('Ustama bilan jami narxni kiriting'); return; }
+        const T = effTotal(c), P = parseNum(c.principal);
+        if (!T) { warn('Jami narxni yoki tovar narxi va ustama foizini kiriting'); return; }
         if (P > T) { warn('Tovar narxi jami narxdan katta'); return; }
         loan = { id, type: 'installment', scheme: 'flat', name: c.name.trim() || 'Nasiya', lender: c.lender.trim(), principal: P || T, total: T, rate: 0, term, issued, payDay, firstDue: addMonths(issued, 1, payDay), status: 'active', createdAt: Date.now() };
       }
+    }
+    if (c.edit) {
+      const patch = Object.assign({}, loan); delete patch.id; delete patch.status; delete patch.createdAt;
+      const res = editLoan(id, patch, Math.min(parseNum(c.prepaid), term || 0));
+      if (res.error) { warn(res.error); return; }
+      L.close();
+      toast('Kredit yangilandi', () => { const u = S.loans._u; S.loans = res.snap; S.loans._u = u; commit(['loans']); });
+      return;
     }
     addLoan(loan, Math.min(parseNum(c.prepaid), term || 0));
     L.close();
@@ -3038,19 +3559,13 @@ const ACT = {
     const l = loanById(el.dataset.id);
     openAmountSheet({ title: 'Ishlatilgan summa', sub: l.name, label: 'Hozirgi qarz, soʻm', value: l.used || 0, help: 'Bank ilovasidagi joriy qarzni kiriting.', onSave: c => { l.used = parseNum(c.v); commit(['loans']); toast('Yangilandi'); } });
   },
-  loanMenu: () => {
-    const l = loanById(routeId()); if (!l) return;
-    openLayer({
-      label: 'Kredit', ctx: { name: l.name, lender: l.lender || '' },
-      render: c => html`${sheetHead('Kredit')}<div class="form">
-        <label class="f"><span class="k">Nomi</span><input type="text" data-k="name" value="${c.name}" maxlength="40"></label>
-        <label class="f"><span class="k">${l.type === 'installment' ? 'Doʻkon' : 'Bank'}</span><input type="text" data-k="lender" value="${c.lender}" maxlength="40"></label></div>
-        <button class="btn pri" data-act="lmSave" style="margin-top:18px">Saqlash</button>
-        <button class="btn dngb sm" data-act="lmDelete" style="margin-top:10px">${ic('trash', 18, 1.6)}Kreditni oʻchirish</button>
-        <p class="lbl" style="font-size:12.5px;margin-top:8px">Oʻchirilganda qilingan toʻlovlar chiqim sifatida tarixda qoladi.</p>`,
-    });
+  loanMenu: () => { const l = loanById(routeId()); if (l) openLoanForm({ loan: l }); },
+  loanEdit: (el) => { const l = loanById(el.dataset.id); if (l) openLoanForm({ loan: l }); },
+  schemeInfo: (el, L) => {
+    const c = L && L.ctx;
+    if (c && !c.edit && c.type === 'bank' && parseNum(c.principal) && parseNum(c.term)) openSchemeInfo('', { type: 'bank', name: c.name.trim() || 'Bu kredit', principal: parseNum(c.principal), rate: parseFloatUz(c.rate), term: parseNum(c.term), scheme: c.scheme });
+    else openSchemeInfo(el.dataset.id || '');
   },
-  lmSave: (el, L) => { const l = loanById(routeId()); if (!l) return; if (!L.ctx.name.trim()) { warn('Nomini yozing'); return; } l.name = L.ctx.name.trim(); l.lender = L.ctx.lender.trim(); commit(['loans']); L.close(); },
   lmDelete: async (el, L) => {
     const id = routeId();
     if (!(await confirmDlg({ title: 'Kreditni oʻchiramizmi?', text: 'Kredit va toʻlov jadvali oʻchiriladi. Qilingan toʻlovlar chiqim sifatida tarixda qoladi.', ok: 'Oʻchirish', danger: true }))) return;
@@ -3062,6 +3577,51 @@ const ACT = {
       for (const r of snap.payments) if (r.loanId === id && r.txId) { const t = findTx(r.txId); if (t) { t.loanId = id; t.loanPayId = r.id; docs.push(docIdForMonth(ymOf(t.date))); } }
       commit(docs);
     });
+  },
+  /* AI */
+  aiOpen: (el) => openAiSheet(el.dataset.h || ''),
+  aiEx: (el, L) => { L.ctx.text = AI_EXAMPLES[+el.dataset.i] || ''; L.ctx.res = null; L.ctx.err = ''; L.rerender(); },
+  aiGo: async (el, L) => {
+    const c = L.ctx; if (c.busy) return;
+    const text = (c.text || '').trim(); if (!text) { warn('Avval matn yozing'); return; }
+    const key = aiKey();
+    c.err = ''; c.res = null;
+    if (!key) { c.res = aiLocalParse(text); c.engine = 'ichki tahlil'; L.rerender(); return; }
+    c.busy = true; L.rerender();
+    try { c.res = await aiClaude(text, key); c.engine = 'Claude'; }
+    catch (e) { c.res = aiLocalParse(text); c.engine = 'ichki tahlil'; c.err = `Claude ishlamadi (${e.message}) — ichki tahlil natijasi koʻrsatildi.`; }
+    c.busy = false; if (!L.closed) L.rerender();
+  },
+  aiApply: (el, L) => {
+    const a = L.ctx.res; if (!a || a.kind === 'unknown') return;
+    L.close();
+    if (a.kind === 'loan') openLoanForm({ prefill: aiLoanPrefill(a) }); else openDebtForm({ prefill: aiDebtPrefill(a) });
+  },
+  aiKeySheet: () => openLayer({
+    label: 'Claude API kaliti', ctx: { v: '' },
+    render: c => html`${sheetHead('Claude API kaliti', aiKey() ? 'Ulangan' : 'Ixtiyoriy')}
+      <p class="lbl" style="font-size:13.5px;margin-top:10px">Kalitsiz ham ishlaydi: ichki tahlilchi oddiy jumlalarni tushunadi. Claude kaliti bilan erkin yozilgan, murakkab matnlar ham tushuniladi.</p>
+      <div class="form" style="margin-top:12px"><label class="f"><span class="k">Kalit (sk-ant-…)</span><input type="password" data-k="v" value="${c.v}" placeholder="${aiKey() ? '••••••••' + aiKey().slice(-4) : 'sk-ant-…'}" autocomplete="off" spellcheck="false"></label></div>
+      <div class="box" style="font-size:13px;margin-top:12px">Kalitni console.anthropic.com saytidagi API Keys boʻlimidan olasiz. Har bir tahlil Anthropic hisobingizdan taxminan 1–2 sent turadi. Kalit faqat shu qurilmada saqlanadi, Telegram bulutiga yuborilmaydi va faqat api.anthropic.com ga joʻnatiladi.</div>
+      <button class="btn pri" data-act="aiKeySave" style="margin-top:16px">Saqlash</button>
+      ${aiKey() ? html`<button class="btn dngb sm" data-act="aiKeyDel" style="margin-top:10px">${ic('trash', 18, 1.6)}Kalitni oʻchirish</button>` : ''}`,
+  }),
+  aiKeySave: (el, L) => {
+    const k = (L.ctx.v || '').trim();
+    if (!/^sk-ant-\S{20,}$/.test(k)) { warn('Kalit sk-ant- bilan boshlanadi'); return; }
+    try { localStorage.setItem(AI_LS, k); } catch (e) { warn('Bu qurilmada saqlab boʻlmadi'); return; }
+    L.close(); render(); toast('Claude kaliti saqlandi');
+  },
+  aiKeyDel: (el, L) => { try { localStorage.removeItem(AI_LS); } catch (e) { } L.close(); render(); toast('Kalit oʻchirildi'); },
+  setName: () => openLayer({
+    label: 'Ism', ctx: { v: S.settings.name || '' },
+    render: c => html`${sheetHead('Ismingiz')}<div class="form" style="margin-top:10px"><label class="f"><span class="k">Ism</span><input type="text" data-k="v" value="${c.v}" maxlength="24" autocomplete="given-name"></label></div>
+      <button class="btn pri" data-act="nameSave" style="margin-top:18px">Saqlash</button>`,
+  }),
+  nameSave: (el, L) => {
+    const n = (L.ctx.v || '').trim().replace(/\s+/g, ' ');
+    if (!n) { warn('Ismni yozing'); return; }
+    S.settings.name = n; commit(['settings']); L.close(); toast('Saqlandi');
   },
   /* settings */
   editAcc: (el) => openAccForm(el && el.dataset.id),
@@ -3114,7 +3674,7 @@ const ACT = {
     await Sync.deleteAll();
     S = emptyState(); VER++;
     try { localStorage.removeItem(LS_KEY); } catch (e) { }
-    Object.assign(OB, { step: 1, accounts: [{ name: 'Naqd', currency: 'UZS', start: '' }, { name: 'Karta', currency: 'UZS', start: '' }], budget: '', rate: '' });
+    Object.assign(OB, { step: 'intro', uname: null, accounts: [{ name: 'Naqd', currency: 'UZS', start: '' }, { name: 'Karta', currency: 'UZS', start: '' }], budget: '', rate: '' });
     location.hash = '#asosiy'; render(); toast('Hammasi oʻchirildi');
   },
   dlgYes: (el, L) => { if (!typedOk(L.ctx.v, L.ctx.typed)) return; L.ctx.fin(true); L.close(); },
@@ -3129,9 +3689,21 @@ const ACT = {
     OB.step = 2; render(); window.scrollTo(0, 0);
   },
   obBack: () => { OB.step = 1; render(); },
+  obTo: (el) => { OB.step = el.dataset.s === 'name' ? 'name' : 'intro'; render(); window.scrollTo(0, 0); },
+  obStart: () => { OB.step = 'name'; render(); window.scrollTo(0, 0); const i = $('[data-ob="uname"]'); if (i && !i.value) i.focus(); },
+  obName: () => {
+    const n = (OB.uname || '').trim().replace(/\s+/g, ' ');
+    if (!n) { warn('Ismingizni yozing'); const i = $('[data-ob="uname"]'); i && i.focus(); return; }
+    OB.uname = n;
+    if (S.settings && S.settings.onboarded) { // existing user: just meet them
+      S.settings.name = n; S.settings.welcomed = true; commit(['settings']);
+      location.hash = '#asosiy'; toast(`Xush kelibsiz, ${n}!`); return;
+    }
+    OB.step = 1; render(); window.scrollTo(0, 0);
+  },
   obFinish: () => {
     const s = defaultSettings();
-    s.onboarded = true;
+    s.onboarded = true; s.welcomed = true; s.name = (OB.uname || '').trim();
     s.accounts = OB.accounts.filter(a => a.name.trim()).map(a => ({ id: newId('a'), name: a.name.trim(), currency: a.currency, start: a.currency === 'USD' ? parseFloatUz(String(a.start).replace(/\s/g, '')) : parseNum(a.start) }));
     s.budget = parseNum(OB.budget); s.usdRate = parseNum(OB.rate);
     S.settings = s;
@@ -3171,7 +3743,7 @@ function render() {
   const app = $('#app'), tb = $('#tabbar');
   const ae = document.activeElement, focusKey = ae && ae.dataset && (ae.dataset.ui || (ae.dataset.ob ? ae.dataset.ob + ae.dataset.i : null));
   const caret = focusKey && typeof ae.selectionStart === 'number' ? ae.selectionStart : null;
-  if (!S.settings || !S.settings.onboarded) {
+  if (!S.settings || !S.settings.onboarded || !S.settings.welcomed) {
     app.innerHTML = viewOnboarding().s; app.className = 'noTab'; tb.className = ''; tb.innerHTML = '';
   } else {
     const r = route();
@@ -3208,6 +3780,7 @@ function onInput(e) {
     const k = el.dataset.ob;
     if (k === 'budget' || k === 'rate' || k === 'start') { const n = parseNum(el.value); el.value = n ? grp(n) : ''; }
     if (k === 'name' || k === 'start') OB.accounts[+el.dataset.i][k] = el.value; else OB[k] = el.value;
+    if (k === 'uname') { const p = $('#obPlate'); if (p) { p.textContent = plateTitle(el.value); p.classList.toggle('empty', !el.value.trim()); } }
     return;
   }
   if (el.dataset.ui) {
@@ -3243,6 +3816,7 @@ const HAP_OK = /Save|^fgDo$|^obFinish$|^amtSave$|^theme$/;
 function onKey(e) {
   const L = topLayer();
   if (e.key === 'Escape' && L) { L.close(); return; }
+  if (e.key === 'Enter' && e.target && e.target.dataset && e.target.dataset.ob === 'uname') { e.preventDefault(); ACT.obName(); return; }
   if (L && L.onKey) L.onKey(e, L);
 }
 function onChange(e) {

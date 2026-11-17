@@ -69,6 +69,8 @@ svg{display:block;flex:none}
 .profile .pn{font-family:var(--serif);font-size:27px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lock .lockic{display:grid;place-items:center;width:52px;height:52px;margin:4px auto 0;border:1.5px solid var(--ink);border-radius:50%;color:var(--ink)}
 .prochip{display:inline-block;font-family:var(--monocaps);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--sig);border:1.3px solid var(--sig);border-radius:4px;padding:1px 5px 0;margin-left:6px;vertical-align:2px}
+.agdone{margin-top:18px;padding:18px;border:1.3px dashed var(--rule);text-align:center}
+.aglink{margin-top:8px;font-family:var(--mono);font-size:13.5px;line-height:1.45;color:var(--sig);word-break:break-all;user-select:all;-webkit-user-select:all}
 .logo{width:58px;height:58px;display:block}
 /* premium plans + gift receipt */
 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:22px}
@@ -2365,6 +2367,7 @@ function viewSozlamalar() {
       <button class="tog ${s.botReminders ? 'on' : ''}" data-act="remToggle" style="margin-top:6px"><span style="text-align:left">Bot eslatmalari${isPremium() ? '' : html`<span class="prochip">Premium</span>`}<span class="lbl" style="display:block;font-size:13.5px">Toʻlov va qarz muddatini ertalab Telegram’da eslatadi</span></span><span class="sw"></span></button>
       ${isPremium() ? '' : html`<button class="btn pri" data-act="premium" style="margin-top:14px">${ic('spark', 19, 1.7)}Premium haqida</button>`}
       <button class="linkrow" data-act="gift" style="margin-top:8px"><span style="color:var(--sig)">${ic('gift', 20, 1.5)}</span><span style="flex:1;text-align:left">Doʻstga Premium sovgʻa qilish</span>${ic('chevR', 18)}</button>
+      ${isOwner() ? html`<button class="linkrow" data-act="adminGrant"><span style="color:var(--sig)">${ic('star', 20, 1.5)}</span><span style="flex:1;text-align:left">Premium berish (tekin)</span><span class="prochip">Admin</span>${ic('chevR', 18)}</button>` : ''}
     </section>
     <section class="sec">
       <div class="sechead"><h2>Hisoblar</h2><span class="lbl">${s.accounts.filter(a => !a.archived).length} ta</span></div>
@@ -3511,6 +3514,60 @@ function giftCard(months, note, from, ready) {
   ${edge('bot')}</div>`;
 }
 
+/* ---------- admin: free Premium (owner only; the server checks it again) ---------- */
+const AG_MONTHS = [1, 3, 6, 12];
+const agMonthsTxt = n => (n === 12 ? '1 yil' : `${n} oy`);
+function openAdminGrant() {
+  openLayer({
+    label: 'Admin', ctx: { mode: 'user', who: '', months: 1, busy: false, done: null },
+    render: c => {
+      const ready = serverReady();
+      const head = sheetHead(html`<span class="aitag">${ic('star', 15, 1.6)}Premium berish</span>`, 'Faqat siz koʻrasiz · toʻlovsiz');
+      const tabs = html`<div class="seg" style="margin-top:16px"><button class="${c.mode === 'user' ? 'on' : ''}" data-act="agMode" data-m="user">Odamga</button><button class="${c.mode === 'link' ? 'on' : ''}" data-act="agMode" data-m="link">Sovgʻa havolasi</button></div>`;
+      if (c.done && c.mode === 'user') return html`${head}${tabs}
+        <div class="agdone"><span class="stamp p" style="margin:0">berildi</span>
+          <div class="serif" style="font-size:26px;margin-top:12px">${c.done.name}</div>
+          <p class="lbl" style="margin-top:4px">${agMonthsTxt(c.done.months)} Premium · ${dMid(c.done.until)} gacha. Unga botda xabar bordi.</p></div>
+        <button class="btn ghost" data-act="agAgain" style="margin-top:16px">${ic('plus', 19, 1.7)}Yana berish</button>`;
+      if (c.done) return html`${head}${tabs}
+        <div class="agdone"><span class="stamp p" style="margin:0">${agMonthsTxt(c.done.months)}</span>
+          <p class="lbl" style="margin-top:12px">Bu havolani ochgan birinchi odam Premium oladi:</p>
+          <div class="aglink" id="agLink">${c.done.link}</div></div>
+        <button class="btn pri" data-act="agShare" style="margin-top:14px">${ic('share', 19, 1.7)}Yuborish</button>
+        <button class="btn ghost" data-act="agCopy" style="margin-top:8px">Nusxalash</button>
+        <button class="linkrow" data-act="agAgain" style="margin-top:8px"><span style="flex:1;text-align:left">Yana havola yaratish</span>${ic('chevR', 18)}</button>`;
+      const months = html`<div class="f" style="margin-top:14px"><span class="k">Muddat</span><div class="seg">${AG_MONTHS.map(n => html`<button class="${c.months === n ? 'on' : ''}" data-act="agMonths" data-n="${n}">${agMonthsTxt(n)}</button>`)}</div></div>`;
+      const go = (label) => html`<button class="btn pri" data-act="agGo" style="margin-top:16px" ${c.busy || !ready ? raw('aria-disabled="true"') : ''}>${ic('star', 19, 1.7)}${!ready ? 'Server ulanmagan' : c.busy ? 'Kuting…' : label}</button>`;
+      if (c.mode === 'user') return html`${head}${tabs}
+        <label class="f" style="margin-top:16px"><span class="k">Kimga</span><input type="text" data-k="who" value="${c.who}" placeholder="@username yoki Telegram ID" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" enterkeyhint="done"></label>
+        ${months}
+        <p class="lbl" style="margin-top:10px;font-size:13.5px">Odam avval botda «Start» ni bosgan boʻlishi kerak. Muddat bor Premium ustiga qoʻshiladi.</p>
+        ${go('Premium berish')}`;
+      return html`${head}${tabs}${months}
+        <p class="lbl" style="margin-top:10px;font-size:13.5px">Havola bir martalik: kim birinchi ochsa, oʻsha oladi. Botga hali kirmagan odamga ham boʻladi.</p>
+        ${go('Bepul havola yaratish')}`;
+    },
+  });
+}
+async function adminGrantGo(L) {
+  const c = L.ctx;
+  if (c.busy || !serverReady()) return;
+  if (c.mode === 'user' && !c.who.trim()) { warn('@username yoki Telegram ID yozing'); return; }
+  c.busy = true; L.rerender();
+  try {
+    if (c.mode === 'user') {
+      const r = await api('/api/admin/premium', { user: c.who.trim(), months: c.months });
+      c.done = { name: r.user.name, months: r.months, until: r.until };
+    } else {
+      const r = await api('/api/admin/gift', { months: c.months });
+      c.done = { link: r.link, months: r.months, code: r.code };
+    }
+    hap('success'); L.dirty = false;
+  } catch (e) { warn(e.message || 'Xatolik'); }
+  c.busy = false;
+  if (!L.closed) L.rerender();
+}
+
 /* ---------- shared debts: the other person confirms in the bot ---------- */
 let SHARES = null; // { mine: [], toMe: [] }
 async function sharesRefresh() {
@@ -4121,6 +4178,13 @@ const ACT = {
   },
   giftSend: (el, L) => giftShare(L.ctx.done),
   giftResend: (el) => { const g = ((ME && ME.gifts) || []).find(x => x.code === el.dataset.code); if (g && !g.redeemed) giftShare(g); },
+  adminGrant: () => { if (isOwner()) openAdminGrant(); },
+  agMode: (el, L) => { L.ctx.mode = el.dataset.m; L.ctx.done = null; L.rerender(); },
+  agMonths: (el, L) => { L.ctx.months = +el.dataset.n; L.rerender(); },
+  agGo: (el, L) => adminGrantGo(L),
+  agAgain: (el, L) => { L.ctx.done = null; L.ctx.who = ''; L.rerender(); },
+  agShare: (el, L) => giftShare({ link: L.ctx.done.link, months: L.ctx.done.months, note: '' }),
+  agCopy: (el, L) => copyText(L.ctx.done.link, L.sheet.querySelector('#agLink')),
   remToggle: () => toggleReminders(),
   debtShare: () => shareDebt(routeId()),
   shareImport: (el) => {

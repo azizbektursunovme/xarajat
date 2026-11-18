@@ -518,7 +518,8 @@ function tgInit() {
   if (tgv('7.7') && WA.disableVerticalSwipes) try { WA.disableVerticalSwipes(); } catch (e) { }
   if (tgv('6.1') && WA.BackButton) try { WA.BackButton.onClick(tgBack); } catch (e) { }
   try { WA.onEvent('themeChanged', () => applyTheme()); } catch (e) { }
-  try { WA.onEvent('activated', () => { Sync.pull(); }); } catch (e) { }
+  // back from Telegram's minimized state: the page was never reloaded, so fetch what changed meanwhile
+  try { WA.onEvent('activated', () => { Sync.pull(); sharesRefresh(3000); }); } catch (e) { }
 }
 
 /* =====================================================================
@@ -3533,7 +3534,7 @@ const serverReady = () => apiOn() && !!ME;
 let ME = null; // last /api/me answer
 async function api(path, body) {
   const r = await fetch(API_BASE + path, {
-    method: body ? 'POST' : 'GET',
+    method: body ? 'POST' : 'GET', cache: 'no-store',
     headers: Object.assign({ 'x-init-data': WA.initData }, body ? { 'content-type': 'application/json' } : {}),
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -3665,10 +3666,16 @@ async function adminGrantGo(L) {
 
 /* ---------- shared debts: the other person confirms in the bot ---------- */
 let SHARES = null; // { mine: [], toMe: [] }
-async function sharesRefresh() {
-  if (!apiOn()) return;
-  try { SHARES = await api('/api/debt-shares'); UIP.sharesAt = Date.now(); saveUIP(); scheduleRender(); } catch (e) { }
+let sharesBusy = false;
+/** fetch the other side's answers; with `minAge` (ms) a fetch that recent is enough */
+async function sharesRefresh(minAge) {
+  if (!apiOn() || sharesBusy) return;
+  if (minAge && SHARES && Date.now() - (UIP.sharesAt || 0) < minAge) return;
+  sharesBusy = true;
+  try { SHARES = await api('/api/debt-shares'); UIP.sharesAt = Date.now(); saveUIP(); scheduleRender(); } catch (e) { } finally { sharesBusy = false; }
 }
+/** a debt in the notebook still waits for the other side's answer */
+const sharesWaiting = () => !!(SHARES && SHARES.mine.some(s => s.status === 'pending' && S.debts.debts.some(d => d.share === s.token)));
 const shareOf = d => (d && d.share && SHARES ? SHARES.mine.find(s => s.token === d.share) : null);
 const SHARE_TXT = { pending: 'javob kutilmoqda', accepted: 'tasdiqladi', rejected: 'rad etdi' };
 /** person page: send the debt to the other person for confirmation; shows their answer */
@@ -4578,6 +4585,7 @@ function boot() {
     if (today() !== lastDay) { if (UI.month === ymOf(lastDay)) UI.month = ymOf(today()); lastDay = today(); }
     materializeRecurring(); scheduleRender();
     Sync.pull();
+    sharesRefresh(3000);
   });
   try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { applyTheme(); }); } catch (e) { }
   Sync.attach();
@@ -4585,6 +4593,8 @@ function boot() {
   if (apiOn()) {
     meRefresh().then(() => remindersSync());
     sharesRefresh();
+    // the other side answers in the bot at any moment: while an answer is awaited, look again now and then
+    setInterval(() => { if (document.visibilityState === 'visible' && sharesWaiting()) sharesRefresh(15000); }, 20000);
     const sp = (WA.initDataUnsafe && WA.initDataUnsafe.start_param) || '';
     const dq = new URLSearchParams(location.search).get('draft') || (sp.startsWith('d_') ? sp.slice(2) : '');
     if (dq) setTimeout(() => draftOpen(dq), 700);

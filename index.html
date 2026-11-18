@@ -3674,15 +3674,24 @@ async function sharesRefresh(minAge) {
   sharesBusy = true;
   try { SHARES = await api('/api/debt-shares'); UIP.sharesAt = Date.now(); saveUIP(); scheduleRender(); } catch (e) { } finally { sharesBusy = false; }
 }
-/** a debt in the notebook still waits for the other side's answer */
-const sharesWaiting = () => !!(SHARES && SHARES.mine.some(s => s.status === 'pending' && S.debts.debts.some(d => d.share === s.token)));
-const shareOf = d => (d && d.share && SHARES ? SHARES.mine.find(s => s.token === d.share) : null);
+/** The other side's answer for a debt. A debt's link can get lost (another device saved the notebook over it, or the
+ *  debt was deleted and typed again) and the debt then goes out under a new link while the other side confirms the
+ *  first one. So links sent for the same debt — same person, direction, date and currency — count too:
+ *  a confirmation on any of them wins, then the debt's own link, then the newest. */
+function shareOf(d) {
+  if (!d || !SHARES) return null;
+  const p = personById(d.pid), name = p ? p.name.trim().replace(/\s+/g, ' ').slice(0, 40) : null;
+  const all = SHARES.mine.filter(s => (d.share && s.token === d.share) || (name && s.person === name && s.dir === d.dir && s.date === d.date && s.currency === d.currency));
+  return all.find(s => s.status === 'accepted') || all.find(s => s.token === d.share) || all[0] || null;
+}
+/** an open debt in the notebook still waits for the other side's answer */
+const sharesWaiting = () => !!(SHARES && S.debts.debts.some(d => { const s = shareOf(d); return s && s.status === 'pending' && calc.debtRemaining(d, S.debts.payments) > 0; }));
 const SHARE_TXT = { pending: 'javob kutilmoqda', accepted: 'tasdiqladi', rejected: 'rad etdi' };
 /** person page: send the debt to the other person for confirmation; shows their answer */
 function shareButton(sm) {
   const d = sm.open.slice().sort((a, b) => (a.date < b.date ? 1 : -1))[0], sh = shareOf(d);
   return html`<div class="sharebox">
-    <button class="btn ghost" data-act="debtShare">${ic('share', 19, 1.7)}${d.share ? 'Qayta yuborish' : 'Tasdiqlash uchun yuborish'}</button>
+    <button class="btn ghost" data-act="debtShare">${ic('share', 19, 1.7)}${d.share || sh ? 'Qayta yuborish' : 'Tasdiqlash uchun yuborish'}</button>
     <p class="lbl" style="font-size:13.5px;margin-top:8px">${sh ? html`${sm.name}: ${stamp(sh.status === 'accepted' ? 'p' : sh.status === 'rejected' ? 'd' : 's', SHARE_TXT[sh.status] || sh.status, 'margin:0 0 0 4px;font-size:10.5px')}` : serverReady() ? 'Havolani ochgan odam qarzni botda tasdiqlaydi — ikkalangiz bir xil summani koʻrasiz.' : 'Tez orada: qarzni ikkinchi tomon botda tasdiqlaydi.'}</p>
   </div>`;
 }
@@ -3700,7 +3709,13 @@ async function shareDebt(pid) {
   const d = sm && sm.open.slice().sort((a, b) => (a.date < b.date ? 1 : -1))[0];
   if (!d) { warn('Ochiq qarz yoʻq'); return; }
   try {
-    const res = d.share ? { link: `https://t.me/${(ME && ME.bot && ME.bot.username) || ''}?start=debt_${d.share}` } : await api('/api/debt-share', { dir: d.dir, amount: calc.debtRemaining(d, S.debts.payments), currency: d.currency, date: d.date, due: d.due || null, note: d.note || null, person: P.name });
+    // send the link this debt already has (also one found for it on the server after the notebook lost it), so the
+    // other side never gets two; after a refusal a new one is needed — the bot answers an old link “already answered”
+    const sh = shareOf(d), reuse = sh ? (sh.status === 'rejected' ? null : sh.token) : d.share || null;
+    if (reuse && d.share !== reuse) { d.share = reuse; commit(['debts']); }
+    // a re-sent link needs the bot's name from /api/me: without it the link would be t.me/?start=… and open nothing
+    if (reuse && !(ME.bot && ME.bot.username)) { warn('Server javob bermadi'); return; }
+    const res = reuse ? { link: `https://t.me/${ME.bot.username}?start=debt_${reuse}` } : await api('/api/debt-share', { dir: d.dir, amount: calc.debtRemaining(d, S.debts.payments), currency: d.currency, date: d.date, due: d.due || null, note: d.note || null, person: P.name });
     if (res.token) { d.share = res.token; commit(['debts']); }
     const amt = money(calc.debtRemaining(d, S.debts.payments), d.currency) + (d.currency === 'USD' ? '' : ' soʻm');
     const text = d.dir === 'given' ? `Salom, ${P.name}! Xarajat daftarimga ${amt} qarzni yozib qoʻydim. Tasdiqlab qoʻying:` : `Salom, ${P.name}! Sizdan olgan ${amt} qarzimni yozib qoʻydim. Tasdiqlab qoʻying:`;

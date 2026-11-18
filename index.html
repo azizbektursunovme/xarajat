@@ -1166,17 +1166,73 @@ const CS = {
 };
 const metaKey = id => `d_${id}_meta`;
 const chunkKey = (id, h) => `d_${id}_${h}`;
-const LS_KNOWN = LS_KEY + '.known';
+const LS_KNOWN = LS_KEY + '.known', LS_BASE = LS_KEY + '.base.';
+
+/* Three-way merge of one doc. base = the version this device last agreed on with the cloud, l = this device, r = cloud.
+   Records match by id: what either side added stays, a deletion beats an untouched record, a field changed on one
+   side keeps that change. Only a field changed on both sides conflicts: the later edit wins (an edit beats a deletion).
+   So a device that hasn't pulled for a while can no longer wipe out what another device wrote meanwhile. */
+function deq(a, b) {
+  if (a === b) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) return a.length === b.length && a.every((v, i) => deq(v, b[i]));
+  const ka = Object.keys(a).filter(k => a[k] !== undefined), kb = Object.keys(b).filter(k => b[k] !== undefined);
+  return ka.length === kb.length && ka.every(k => deq(a[k], b[k]));
+}
+const isRec = v => !!v && typeof v === 'object' && !Array.isArray(v);
+const idList = a => Array.isArray(a) && a.every(x => isRec(x) && x.id != null) && new Set(a.map(x => x.id)).size === a.length;
+function merge3(b, l, r, preferLocal) {
+  if (deq(l, r)) return l;
+  if (deq(b, l)) return r;
+  if (deq(b, r)) return l;
+  if (l === undefined || r === undefined) return l === undefined ? r : l;
+  if (idList(l) && idList(r)) {
+    const B = new Map(idList(b) ? b.map(x => [x.id, x]) : []), L = new Set(l.map(x => x.id)), R = new Map(r.map(x => [x.id, x])), out = [];
+    for (const x of l) { const v = merge3(B.get(x.id), x, R.get(x.id), preferLocal); if (v !== undefined) out.push(v); }
+    for (const x of r) if (!L.has(x.id)) { const v = merge3(B.get(x.id), undefined, x, preferLocal); if (v !== undefined) out.push(v); }
+    return out;
+  }
+  if (isRec(l) && isRec(r)) {
+    const bo = isRec(b) ? b : {}, out = {};
+    for (const k of new Set([...Object.keys(l), ...Object.keys(r)])) { const v = merge3(bo[k], l[k], r[k], preferLocal); if (v !== undefined) out[k] = v; }
+    return out;
+  }
+  return preferLocal ? l : r;
+}
+function mergeDoc(b, l, r) {
+  const strip = o => isRec(o) ? Object.assign({}, o, { _u: undefined }) : o;
+  const m = Object.assign({}, merge3(strip(b), strip(l), strip(r), (l._u || 0) >= (r._u || 0)));
+  const same = deq(m, strip(r));
+  // the result must look newer than both sides, or a device holding either one would ignore it
+  m._u = same ? (r._u || 0) : Math.max(Date.now(), l._u || 0, (r._u || 0) + 1);
+  return m;
+}
 
 const Sync = {
   mode: 'connecting', // connecting | sync | local (old Telegram) | outside
   state: 'idle',      // idle | saving | error  (quiet indicator)
   remote: {},         // docId -> ts known in the cloud (persisted: deletions elsewhere can be detected)
   meta: {},           // docId -> last manifest seen/written
+  base: {},           // docId -> { h: cloud hash, lh: hash of j, j: this device's JSON of that version } — the merge base
   W: {}, keyCount: 0, pulling: false,
   pending(id) { const w = this.W[id]; return !!(w && (w.timer || w.inflight || w.retryT)); },
   saveKnown() { try { localStorage.setItem(LS_KNOWN, JSON.stringify(this.remote)); } catch (e) { } },
-  loadKnown() { try { this.remote = JSON.parse(localStorage.getItem(LS_KNOWN) || '{}') || {}; } catch (e) { this.remote = {}; } },
+  loadKnown() {
+    try { this.remote = JSON.parse(localStorage.getItem(LS_KNOWN) || '{}') || {}; } catch (e) { this.remote = {}; }
+    this.base = {};
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(LS_BASE)) { const b = JSON.parse(localStorage.getItem(k)); if (b && b.h) this.base[k.slice(LS_BASE.length)] = b; } } } catch (e) { }
+  },
+  setBase(id, h, j) {
+    const b = this.base[id] = { h, lh: j == null ? null : fnv(j), j: j == null ? null : j };
+    try { localStorage.setItem(LS_BASE + id, JSON.stringify(b)); } catch (e) { /* quota: the base still lives in memory */ }
+  },
+  dropBase(id) { delete this.base[id]; try { localStorage.removeItem(LS_BASE + id); } catch (e) { } },
+  /** fold the cloud's version r into this device's doc (3-way, see merge3) */
+  mergeIn(id, r) {
+    const b = this.base[id];
+    setDoc(id, mergeDoc(b && b.j ? JSON.parse(b.j) : null, getDoc(id), r));
+    normalizeState(); VER++; saveLocal(); scheduleRender();
+  },
   setState(s) {
     this.state = s;
     const el = document.getElementById('syncdot'); if (!el) return;
@@ -1198,7 +1254,7 @@ const Sync = {
     if (w.inflight) { w.again = true; return; }
     w.inflight = true; this.refreshState();
     try {
-      await this.writeDoc(id);
+      await this.writeDoc(id, (w.tries || 0) >= 2);
       w.failed = false; w.tries = 0;
     } catch (e) {
       w.failed = true; w.tries = (w.tries || 0) + 1;
@@ -1212,8 +1268,8 @@ const Sync = {
       this.countKeysSoon();
     }
   },
-  async writeDoc(id) {
-    const data = getDoc(id);
+  async writeDoc(id, force) {
+    let data = getDoc(id);
     let cur = null;
     try { const r = await CS.getMany([metaKey(id)]); cur = r[metaKey(id)] ? JSON.parse(r[metaKey(id)]) : null; } catch (e) { if (e && e.code === 'timeout') throw e; cur = null; }
     if (!data) { // doc deleted locally → delete manifest first, then its chunks
@@ -1223,13 +1279,19 @@ const Sync = {
         if (mine.includes(metaKey(id))) await CS.remove([metaKey(id)]);
         await CS.remove(mine.filter(k => k !== metaKey(id)));
       }
-      delete this.remote[id]; delete this.meta[id]; this.saveKnown();
+      delete this.remote[id]; delete this.meta[id]; this.saveKnown(); this.dropBase(id);
       return;
     }
-    // someone else wrote a newer version → take theirs (newer wins)
-    if (cur && (cur.ts || 0) > (data._u || 0)) { await this.applyRemote(id, cur); return; }
+    // another device wrote this doc since we last synced it → merge its changes in first, never overwrite them
+    const b = this.base[id];
+    if (cur && !(b && b.h === cur.hash)) {
+      const r = await this.readDoc(id, cur);
+      // unreadable = probably mid-write elsewhere: retry; after a few tries write ours (the old doc is broken anyway)
+      if (!r && !force) throw Object.assign(new Error('cloud doc unreadable'), { code: 'busy' });
+      if (r) { if (r._u == null) r._u = cur.ts; this.mergeIn(id, r); data = getDoc(id); }
+    }
     const json = JSON.stringify(data), hash = fnv(json);
-    if (cur && cur.hash === hash) { this.meta[id] = cur; this.remote[id] = cur.ts; this.saveKnown(); return; }
+    if (cur && cur.hash === hash) { this.meta[id] = cur; this.remote[id] = cur.ts; this.saveKnown(); this.setBase(id, hash, json); return; }
     const chunks = splitChunks(json), hs = chunks.map(fnv);
     const have = new Set(cur && Array.isArray(cur.c) ? cur.c : []);
     const todo = [];
@@ -1237,7 +1299,7 @@ const Sync = {
     await pool(todo, 4, t => CS.set(chunkKey(id, t.h), t.v));
     const meta = { v: 1, n: chunks.length, hash, ts: data._u || Date.now(), c: hs };
     await CS.set(metaKey(id), JSON.stringify(meta));
-    this.meta[id] = meta; this.remote[id] = meta.ts; this.saveKnown();
+    this.meta[id] = meta; this.remote[id] = meta.ts; this.saveKnown(); this.setBase(id, hash, json);
     const stale = cur && Array.isArray(cur.c) ? [...new Set(cur.c.filter(h => !hs.includes(h)))] : [];
     if (stale.length) await CS.remove(stale.map(h => chunkKey(id, h))).catch(() => { });
   },
@@ -1254,8 +1316,17 @@ const Sync = {
     const data = await this.readDoc(id, m, allKeys);
     if (!data) return false;
     if (data._u == null) data._u = m.ts;
-    setDoc(id, data); this.meta[id] = m; this.remote[id] = m.ts; this.saveKnown();
+    this.meta[id] = m; this.remote[id] = m.ts; this.saveKnown();
+    const loc = getDoc(id), b = this.base[id];
+    if (loc && b && fnv(JSON.stringify(loc)) !== b.lh) {
+      // this device also has changes the cloud lacks (checked after the read: an edit may land meanwhile) → keep both
+      const rj = JSON.stringify(data);
+      this.mergeIn(id, data); this.setBase(id, m.hash, rj); this.queue(id);
+      return true;
+    }
+    setDoc(id, data);
     normalizeState(); VER++; saveLocal(); scheduleRender();
+    const nd = getDoc(id); if (nd) this.setBase(id, m.hash, JSON.stringify(nd));
     return true;
   },
   /** fetch manifests and reconcile every doc by ts (newer wins) */
@@ -1273,17 +1344,24 @@ const Sync = {
       let changed = false;
       for (const id of Object.keys(remoteMeta)) {
         if (!/^(settings|debts|loans|m-\d{4}-\d{2})$/.test(id) || this.pending(id)) continue;
-        const m = remoteMeta[id], loc = getDoc(id), lts = loc ? (loc._u || 0) : -1;
-        if (!loc || m.ts > lts) { if (await this.applyRemote(id, m, keys)) changed = true; }
-        else if (lts > m.ts) { this.meta[id] = m; this.queue(id); }
-        else { this.meta[id] = m; this.remote[id] = m.ts; }
+        const m = remoteMeta[id], loc = getDoc(id), b = this.base[id];
+        if (!loc) { if (await this.applyRemote(id, m, keys)) changed = true; continue; }
+        const lj = JSON.stringify(loc), lh = fnv(lj), lts = loc._u || 0;
+        this.meta[id] = m;
+        if (lh === m.hash) { this.remote[id] = m.ts; if (!b || b.h !== m.hash || b.lh !== lh) this.setBase(id, m.hash, lj); continue; }
+        // with a base: the cloud changed if its hash moved, this device changed if its JSON moved.
+        // without one (first start of this version): the newer whole doc wins, as before
+        if (b ? b.h !== m.hash : m.ts > lts) { if (await this.applyRemote(id, m, keys)) changed = true; } // applyRemote keeps this device's own changes
+        else if (b ? b.lh !== lh : lts > m.ts) { if (!b) this.setBase(id, m.hash, null); this.remote[id] = m.ts; this.queue(id); }
+        else this.remote[id] = m.ts;
       }
       for (const id of localDocIds()) {
         if (id in remoteMeta || this.pending(id)) continue;
-        if (this.remote[id] != null) { removeDoc(id); delete this.remote[id]; changed = true; } // deleted on another device
+        if (this.remote[id] != null) { removeDoc(id); delete this.remote[id]; this.dropBase(id); changed = true; } // deleted on another device
         else this.queue(id); // never uploaded: migrate up
       }
       for (const id of Object.keys(this.remote)) if (!(id in remoteMeta) && !getDoc(id)) delete this.remote[id];
+      for (const id of Object.keys(this.base)) if (!(id in remoteMeta) && !getDoc(id)) this.dropBase(id);
       this.saveKnown();
       if (changed) { normalizeState(); VER++; saveLocal(); materializeRecurring(); scheduleRender(); }
       if (this.keyCount > 600 && !this.busy()) this.gc(keys, remoteMeta);
@@ -1317,6 +1395,7 @@ const Sync = {
     this.W = {};
     try { const keys = (await CS.keys()).filter(k => k.startsWith('d_')); const metas = keys.filter(k => k.endsWith('_meta')); await CS.remove(metas); await CS.remove(keys.filter(k => !k.endsWith('_meta'))); } catch (e) { }
     this.remote = {}; this.meta = {}; this.saveKnown(); this.keyCount = 0;
+    for (const id of Object.keys(this.base)) this.dropBase(id);
   },
 };
 
@@ -3716,7 +3795,8 @@ async function shareDebt(pid) {
     // a re-sent link needs the bot's name from /api/me: without it the link would be t.me/?start=… and open nothing
     if (reuse && !(ME.bot && ME.bot.username)) { warn('Server javob bermadi'); return; }
     const res = reuse ? { link: `https://t.me/${ME.bot.username}?start=debt_${reuse}` } : await api('/api/debt-share', { dir: d.dir, amount: calc.debtRemaining(d, S.debts.payments), currency: d.currency, date: d.date, due: d.due || null, note: d.note || null, person: P.name });
-    if (res.token) { d.share = res.token; commit(['debts']); }
+    // a sync may have replaced the notebook while we waited: write the link into the current record, not the old copy
+    if (res.token) { (S.debts.debts.find(x => x.id === d.id) || d).share = res.token; commit(['debts']); }
     const amt = money(calc.debtRemaining(d, S.debts.payments), d.currency) + (d.currency === 'USD' ? '' : ' soʻm');
     const text = d.dir === 'given' ? `Salom, ${P.name}! Xarajat daftarimga ${amt} qarzni yozib qoʻydim. Tasdiqlab qoʻying:` : `Salom, ${P.name}! Sizdan olgan ${amt} qarzimni yozib qoʻydim. Tasdiqlab qoʻying:`;
     WA.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(res.link) + '&text=' + encodeURIComponent(T(text)));

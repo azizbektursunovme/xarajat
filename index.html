@@ -562,6 +562,7 @@ html.short .save{min-height:52px;margin-top:8px}
 [data-design=zamonaviy] .fld{border-bottom:0;background:var(--key);border-radius:14px;padding:7px 10px 6px}
 [data-design=zamonaviy] .f input[type=text],[data-design=zamonaviy] .f input[type=date],[data-design=zamonaviy] .f input[type=number],[data-design=zamonaviy] .f input[type=tel],[data-design=zamonaviy] .f input:not([type]),[data-design=zamonaviy] .f textarea,[data-design=zamonaviy] .f select,[data-design=zamonaviy] .accrow input{border:1px solid transparent;background:var(--key);border-radius:12px;padding:9px 12px}
 [data-design=zamonaviy] .f input:focus,[data-design=zamonaviy] .f textarea:focus{border-color:var(--sig);border-style:solid}
+[data-design=zamonaviy] .frow>*,[data-design=zamonaviy] .f input{min-width:0} /* padded date fields must not push a two-column row past the screen */
 [data-design=zamonaviy] .keys{gap:6px}
 [data-design=zamonaviy] .keys button{border:0!important;border-radius:14px;background:var(--key);font-family:var(--sans);font-weight:400;font-size:26px;min-height:54px}
 [data-design=zamonaviy] .accrow{border-bottom:0}
@@ -1143,12 +1144,15 @@ const calc = {
     }
     return { income, expense, byCat, count };
   },
-  /** Daily limit = (budget − month expense) / days left incl. today; never negative */
-  dailyLimit(budget, expense, t = today()) {
+  /** Today's allowance. It is fixed at the start of the day: what was left before today, split over the days left
+   *  (incl. today). What is spent today then comes off it in full. `expense` is the whole month (today included),
+   *  `todayExp` the part dated today. limit is never negative; left is (negative = today's allowance overspent). */
+  dailyLimit(budget, expense, t = today(), todayExp = 0) {
     const [y, m, d] = t.split('-').map(Number);
     const daysLeft = daysInMonth(y, m) - d + 1;
     const remaining = budget - expense;
-    return { limit: Math.max(0, Math.floor(remaining / daysLeft)), daysLeft, remaining, over: budget > 0 && remaining < 0 };
+    const base = Math.max(0, Math.floor((remaining + todayExp) / daysLeft)), left = base - todayExp;
+    return { limit: Math.max(0, left), left, base, daysLeft, remaining, over: budget > 0 && remaining < 0 };
   },
   debtPaid(d, pays) { return sum(pays.filter(p => p.debtId === d.id), 'amount'); },
   debtRemaining(d, pays) { return Math.max(0, d.amount - calc.debtPaid(d, pays)); },
@@ -2109,9 +2113,9 @@ function viewHome() {
   const txs = allTx(), { st, ranked, fills } = catRank(ym);
   const bal = calc.accountBalances(S, txs), tb = calc.totalBalanceUZS(S, bal);
   const [yy, mm] = ym.split('-').map(Number);
-  const dl = calc.dailyLimit(s.budget, st.expense, isCur ? t : `${ym}-01`);
   const isPast = ym < ymOf(t);
   const todayExp = sum(txs.filter(x => x.date === t && x.type === 'exp'), 'uzs');
+  const dl = calc.dailyLimit(s.budget, st.expense, isCur ? t : `${ym}-01`, isCur ? todayExp : 0);
 
   let hero;
   if (isCur && s.budget > 0) {
@@ -3071,14 +3075,15 @@ function afHint(AF) {
   const uz = calc.toUZS(amt, cur, rate);
   if (AF.type === 'exp') {
     const c = catById(AF.catId), ym = ymOf(AF.date);
-    const st = calc.monthStats(allTx().filter(t => t.id !== AF.id), ym);
+    const others = allTx().filter(t => t.id !== AF.id), st = calc.monthStats(others, ym);
     if (c && c.limit) {
       const left = c.limit - (st.byCat[c.id] || 0) - uz;
       return left >= 0 ? html`${catName(c.id)} limitidan <span class="mono" style="color:var(--ink)">${fmt(left)}</span> soʻm qoladi` : html`<span class="dng">${catName(c.id)} limiti <span class="mono">${fmt(-left)}</span> soʻmga oshadi</span>`;
     }
     if (S.settings.budget && ym === ymOf(today())) {
-      const dl = calc.dailyLimit(S.settings.budget, st.expense, today());
-      const left = dl.limit - uz;
+      // today's allowance as it will be once this entry is saved (an earlier date in the month shrinks it too)
+      const t0 = today(), tExp = sum(others.filter(x => x.date === t0 && x.type === 'exp'), 'uzs');
+      const left = calc.dailyLimit(S.settings.budget, st.expense + uz, t0, tExp + (AF.date === t0 ? uz : 0)).left;
       return left >= 0 ? html`Bugungi limitdan <span class="mono" style="color:var(--ink)">${fmt(left)}</span> soʻm qoladi` : html`<span class="dng">Bugungi limitdan <span class="mono">${fmt(-left)}</span> soʻm oshadi</span>`;
     }
     return c ? html`Bu oy ${c.name}: <span class="mono" style="color:var(--ink)">${fmt(st.byCat[c.id] || 0)}</span> soʻm` : '';
